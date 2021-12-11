@@ -195,6 +195,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.0"
+  flutter_phosphor_icons:
+    dependency: "direct main"
+    description:
+      name: flutter_phosphor_icons
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1+5"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -413,6 +420,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.7.0"
+  titled_navigation_bar:
+    dependency: "direct main"
+    description:
+      name: titled_navigation_bar
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.1.0"
   transparent_image:
     dependency: "direct main"
     description:

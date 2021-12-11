@@ -1,12 +1,18 @@
+// @dart=2.9
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mentor_mate/splashscreen.dart';
+import 'package:mentor_mate/welcome_and_other.dart';
 
 //import 'package:splashscreen/splashscreen.dart';
 Future<void> _messageHandler(RemoteMessage message) async {
-  print('background message ${message.notification!.body}');
+  print('background message ${message.notification.body}');
 }
 
 Future main() async {
@@ -20,6 +26,10 @@ Future main() async {
     print('Message clicked!');
   });
   runApp(MyApp());
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    //systemNavigationBarColor: Colors.blue, // navigation bar color
+    statusBarColor: Colors.transparent, // status bar color
+  ));
 }
 
 class MyApp extends StatefulWidget {
@@ -66,18 +76,30 @@ class _MyAppState extends State<MyApp> {
           // closer together (more dense) than on mobile platforms.
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home:
-            SplashScreen() /*SlashScreen(
-          useLoader: false,
-          photoSize: 40,
-          image: Image.asset("assets/logo.png"),
-          seconds: 2,
-          navigateAfterSeconds: new TeacherHome(),
-          backgroundColor: Colors.white,
-        )*/
-        );
+        home: SplashScreen());
   }
-  // Future notificationSelected(String? payload)async{
-
-  //   }
 }
+/*
+class AuthCheck extends StatefulWidget {
+  const AuthCheck({key}) : super(key: key);
+
+  @override
+  _AuthCheckState createState() => _AuthCheckState();
+}
+
+class _AuthCheckState extends State<AuthCheck> {
+  @override
+  void initState() async{
+    super.initState();
+    DocumentSnapshot document=await FirebaseFirestore.instance.collection('Users').doc(FirebaseAuth.instance.currentUser!.uid).get();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (FirebaseAuth.instance.currentUser != null) {
+      return document.data()['role']? Home();
+    } else {
+      return Welcome();
+    }
+  }
+}*/

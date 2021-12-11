@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -100,13 +99,14 @@ void addUserData() async {
       'div': divController.text,
       "roll": rollController.text,
       'role': role,
-      'messageId': id
+      'id':
+          '${nameController.text} ${yearController.text} ${branchController.text} ${divController.text} ${rollController.text}'
     };
 
     await _firestore
-        .collection('users')
+        .collection('Users')
         .doc(_auth.currentUser!.uid)
-        .set(userData);
+        .update(userData);
   } else {
     print('Enter Some Text');
   }

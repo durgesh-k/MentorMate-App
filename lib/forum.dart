@@ -11,18 +11,6 @@ import 'package:mentor_mate/teacher_chat_screen.dart';
 
 enum SinginCharacter { lowToHigh, highToLow, alphabetically }
 
-// getUSersTrip() async {
-//   var datas = await FirebaseFirestore.instance
-//       .collection('chatroom')
-//       .doc(widget.chatRoomId)
-//       .collection('chats')
-//       .doc(chatRoomId)
-//       .collection('doubts')
-//       .orderBy('time', descending: false)
-//       .get();
-//       return data.documents
-// }
-
 class FormDart extends StatefulWidget {
   Map<String, dynamic> teacherMap;
   FormDart({
@@ -105,8 +93,6 @@ class _FormDartState extends State<FormDart> {
                   .snapshots(),
               builder: (ctx, AsyncSnapshot<QuerySnapshot> usersnapshot) {
                 if (usersnapshot.connectionState == ConnectionState.waiting) {
-                  // print("aSADSA...............................");
-                  // print( usersnapshot.data!.docs[].data());
                   return Container(
                       child: Center(child: CircularProgressIndicator()));
                 } else {
@@ -114,14 +100,10 @@ class _FormDartState extends State<FormDart> {
                     child: ListView.builder(
                         itemCount: usersnapshot.data?.docs.length,
                         itemBuilder: (BuildContext context, index) {
-                          print("aSADSA...............................");
                           data = usersnapshot.data!.docs[index].data();
-                          // print(usersnapshot.data!.docs[index].data());
                           Map<String, dynamic> map =
                               usersnapshot.data!.docs[index].data()
                                   as Map<String, dynamic>;
-                          print(map['type'] == 'doubt');
-                          print("look above.................................");
                           return map['type'] == 'doubt'
                               ? ForumCard(
                                   map: map,
@@ -356,7 +338,6 @@ class _ForumChatScreenState extends State<ForumChatScreen> {
               ),
             ],
           ),
-          
         ),
       ),
       body: Stack(
@@ -394,19 +375,17 @@ class _ForumChatScreenState extends State<ForumChatScreen> {
                                       print(id);
                                     });
                                   }*/
-                                if(widget.userMap['id']==map['id']){
-                                    
+                                if (widget.userMap['id'] == map['id']) {
                                   return map['type'] == 'message'
                                       ? Message(
                                           check: 'student',
                                           map: map,
                                         )
                                       : DoubtMessage(map: map);
-                                
-                                }else {
-                          print("Tjhis is empty container");
-                          return Container();
-                        }
+                                } else {
+                                  print("Tjhis is empty container");
+                                  return Container();
+                                }
                               });
                         } else {
                           print("Tjhis is empty container");

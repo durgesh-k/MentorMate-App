@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mentor_mate/chat/firebase.dart';
@@ -19,6 +21,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   String _versionName = 'V1.0';
   final splashDelay = 4;
+  var userMap;
 
   @override
   void initState() {
@@ -28,19 +31,57 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   _loadWidget() async {
-    var _duration = Duration(seconds: splashDelay);
-    return Timer(_duration, navigationPage);
+    if (FirebaseAuth.instance.currentUser != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .get()
+            .then((value) async {
+          setState(() {
+            role = value.get('role');
+            userMap = value.data();
+          });
+        });
+      } catch (e) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('teachers')
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .get()
+              .then((value) async {
+            setState(() {
+              role = value.get('role');
+              userMap = value.data();
+            });
+          });
+        } catch (e) {
+          print('Error loading user');
+        }
+      }
+
+      var _duration = Duration(seconds: splashDelay);
+      return Timer(_duration, navigationPageloggedIn);
+    } else {
+      var _duration = Duration(seconds: splashDelay);
+      return Timer(_duration, navigationPage);
+    }
   }
 
   void navigationPage() {
-    print('---------------------');
-    print(userMap);
-    //await isUserLoggedIn();
-    Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (BuildContext context) =>
-                /*auth.currentUser != null ? StudentHome() :*/ Welcome()));
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (BuildContext context) => Welcome()));
+  }
+
+  void navigationPageloggedIn() {
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (BuildContext context) {
+      if (role == 'student') {
+        return StudentHome(userMap: userMap);
+      } else {
+        return TeacherHome(teacherMap: userMap);
+      }
+    }));
   }
 
   @override

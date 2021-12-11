@@ -1,4 +1,6 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -209,7 +211,8 @@ class _SignUpState extends State<SignUp> {
                         isLoading = true;
                       });
 
-                      createAccount(email.text, password.text).then((user) {
+                      createAccount(email.text, password.text)
+                          .then((user) async {
                         if (user != null) {
                           setState(() {
                             isLoading = false;
@@ -225,9 +228,18 @@ class _SignUpState extends State<SignUp> {
                                   MaterialPageRoute(
                                     builder: (context) => TeacherLogin(),
                                   ));
+                          Map<String, dynamic> user = {
+                            'role': role,
+                            'email': email.text,
+                            'password': password.text
+                          };
+                          await FirebaseFirestore.instance
+                              .collection('Users')
+                              .doc(FirebaseAuth.instance.currentUser!.uid)
+                              .set(user);
 
                           print("Account Created Sucessful");
-                          Fluttertoast.showToast(
+                          await Fluttertoast.showToast(
                               msg: 'Account Created Successfully',
                               toastLength: Toast.LENGTH_SHORT,
                               gravity: ToastGravity.BOTTOM,
