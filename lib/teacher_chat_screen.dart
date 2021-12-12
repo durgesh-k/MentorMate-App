@@ -217,6 +217,7 @@ class _TextInput2State extends State<TextInput2> {
 
         imageUrl = downloadUrl;
         print(imageUrl);
+        onSendMessage();
       } else {
         print('No Path Received');
       }

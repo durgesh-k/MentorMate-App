@@ -367,7 +367,7 @@ class TextInput extends StatefulWidget {
 class _TextInputState extends State<TextInput> {
   File? _image;
   final _picker = ImagePicker();
-  void uploadImage() async {
+  /*void uploadImage() async {
     final _storage = FirebaseStorage.instance;
     final _picker = ImagePicker();
     PickedFile image;
@@ -402,13 +402,14 @@ class _TextInputState extends State<TextInput> {
 
         imageUrl = downloadUrl;
         print(imageUrl);
+        onSendMessage();
       } else {
         print('No Path Received');
       }
     } else {
       print('Grant Permissions and try again');
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
