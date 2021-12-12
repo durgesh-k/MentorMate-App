@@ -41,6 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
           setState(() {
             role = value.get('role');
             userMap = value.data();
+            currentName = value.get('name');
           });
         });
       } catch (e) {

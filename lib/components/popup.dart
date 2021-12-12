@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mentor_mate/chat/firebase.dart';
 import 'package:mentor_mate/chat_screen.dart';
 import 'package:mentor_mate/doubt_screen.dart';
+import 'package:mentor_mate/forum.dart';
 import 'package:mentor_mate/globals.dart';
 
 /// {@template hero_dialog_route}
@@ -254,11 +255,108 @@ class _DoubtSolvedPopupState extends State<DoubtSolvedPopup> {
                               .doc(widget.id)
                               .collection('chats')
                               .doc(widget.id)
-                              .collection('doubts').doc(widget.doubtid).set(message)
-                              ;
+                              .collection('doubts')
+                              .doc(widget.doubtid)
+                              .set(message);
                         });
-                        
-                        
+                      },
+                      child: const Text(
+                        'Yes',
+                        style:
+                            TextStyle(fontFamily: 'MontserratB', fontSize: 18),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ForumDoubtPopup extends StatefulWidget {
+  Map<String, dynamic> map;
+  String id;
+  String doubtid;
+  ForumDoubtPopup({required this.map, required this.id, required this.doubtid});
+  @override
+  _ForumDoubtPopupState createState() => _ForumDoubtPopupState();
+}
+
+class _ForumDoubtPopupState extends State<ForumDoubtPopup> {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Hero(
+          tag: _heroDoubt,
+          createRectTween: (begin, end) {
+            return CustomRectTween(begin: begin, end: end);
+          },
+          child: Material(
+            color: Colors.white,
+            elevation: 0,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                        padding: EdgeInsets.symmetric(vertical: 18.0),
+                        child: ForumMessage(map: widget.map)),
+                    SizedBox(
+                      height: 40,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 30.0),
+                      child: Container(
+                          width: 200,
+                          child: Text(
+                            'Was your doubt solved?',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontFamily: 'MontserratM', fontSize: 20),
+                          )),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                      child: Divider(
+                        thickness: 0.2,
+                        color: Colors.black,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        setState(() async {
+                          widget.map['solved'] = true;
+                          Map<String, dynamic> message = {
+                            'id': widget.map['id'],
+                            "sendby": widget.map['sendby'],
+                            'to': widget.map['to'],
+                            'type': widget.map['type'],
+                            'solved': true,
+                            "message": widget.map['message'],
+                            "time": widget.map['time'],
+                            'name': widget.map['name'],
+                            'image_url': widget.map['image_url'],
+                            'servertimestamp': widget.map['servertimestamp'],
+                            'searchKeywords': widget.map['searchKeywords'],
+                          };
+                          Navigator.pop(context);
+                          await FirebaseFirestore.instance
+                              .collection('Forum')
+                              .doc(widget.id)
+                              .collection('solutions')
+                              .doc(widget.doubtid)
+                              .set(message);
+                        });
                       },
                       child: const Text(
                         'Yes',

@@ -6,9 +6,9 @@ import 'package:mentor_mate/globals.dart';
 
 class Search extends StatefulWidget {
   String search;
-    Map<String, dynamic> teacherMap;
+  Map<String, dynamic> teacherMap;
 
-  Search({required this.search,required this.teacherMap});
+  Search({required this.search, required this.teacherMap});
   @override
   _SearchState createState() => _SearchState();
 }
@@ -55,10 +55,10 @@ class _SearchState extends State<Search> {
           StreamBuilder<QuerySnapshot>(
             stream: (name != "" && name != null)
                 ? FirebaseFirestore.instance
-                    .collection('doubts')
+                    .collection('Forum')
                     // .where("searchKeywords", isEqualTo: widget.search)
                     .snapshots()
-                : FirebaseFirestore.instance.collection('doubts').snapshots(),
+                : FirebaseFirestore.instance.collection('Forum').snapshots(),
             builder: (context, snapshot) {
               return (snapshot.connectionState == ConnectionState.waiting)
                   ? Center(
@@ -69,16 +69,15 @@ class _SearchState extends State<Search> {
                         itemCount: snapshot.data!.docs.length,
                         itemBuilder: (context, index) {
                           DocumentSnapshot data = snapshot.data!.docs[index];
-                          Map<String, dynamic> map =
-                              snapshot.data!.docs[index].data()
-                                  as Map<String, dynamic>;
+                          Map<String, dynamic> map = snapshot.data!.docs[index]
+                              .data() as Map<String, dynamic>;
                           print("THis is title");
                           print(data['title']);
                           print(data['searchKeywords']);
                           print(widget.search);
                           return data['searchKeywords'] == widget.search
-                              ?
-                              ForumCard(map: map, teacherMap: widget.teacherMap)
+                              ? ForumCard(
+                                  map: map, teacherMap: widget.teacherMap)
                               //  Card(
                               //     child: Row(
                               //       children: [
@@ -94,7 +93,7 @@ class _SearchState extends State<Search> {
                               //     ),
                               //   )
                               : Container(
-                                child: Text("Visible?"),
+                                  child: Text("Visible?"),
                                   height: 0,
                                 );
                         },

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mentor_mate/authentication/login.dart';
+import 'package:mentor_mate/chat/firebase.dart';
 import 'package:mentor_mate/components/loader.dart';
 import 'package:mentor_mate/globals.dart';
 import 'package:mentor_mate/home.dart';
@@ -99,6 +100,14 @@ void addUserData() async {
       'div': divController.text,
       "roll": rollController.text,
       'role': role,
+      'messageId': id,
+      'uid': auth.currentUser!.uid,
+      "status": "Unavailable",
+      "timestamp": FieldValue.serverTimestamp().toString(),
+      "time": DateTime.now().hour,
+      "istyping": false,
+      "recent": "no messages",
+      "touser": "noid",
       'id':
           '${nameController.text} ${yearController.text} ${branchController.text} ${divController.text} ${rollController.text}'
     };

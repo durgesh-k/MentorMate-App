@@ -17,13 +17,13 @@ class _BottomDrawerState extends State<BottomDrawer> {
   @override
   void initState() {
     super.initState();
-    var androidInitilize = new AndroidInitializationSettings('ic_launcher111');
+    /*var androidInitilize = new AndroidInitializationSettings('ic_launcher111');
     var iOSinitilize = new IOSInitializationSettings();
     var initilizationSettings = new InitializationSettings(
         android: androidInitilize, iOS: iOSinitilize);
     flutterLocalNotifications = new FlutterLocalNotificationsPlugin();
     flutterLocalNotifications!.initialize(initilizationSettings,
-        onSelectNotification: notificationSelected);
+        onSelectNotification: notificationSelected);*/
   }
 
   double doubtOpacity = 0;

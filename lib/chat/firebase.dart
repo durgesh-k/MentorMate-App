@@ -13,14 +13,64 @@ final FirebaseAuth auth = FirebaseAuth.instance;
 Map<String, dynamic>? userMap;
 
 String chatRoomId(String user1, String user2) {
-  if (user1[0].toLowerCase().codeUnits[0] > user2.toLowerCase().codeUnits[0]) {
+  if (user1.toLowerCase().codeUnits[0] > user2.toLowerCase().codeUnits[0]) {
     return "$user1$user2";
   } else {
     return "$user2$user1";
   }
 }
 
-String roomId = chatRoomId(auth.currentUser!.displayName!, userMap?['name']);
+String roomId = chatRoomId(auth.currentUser!.uid, userMap?['uid']);
+
+void onProvideSolution(String? docId) async {
+  var user;
+  role == 'student'
+      ? await _firestore
+          .collection("Users")
+          .doc(auth.currentUser!.uid)
+          .get()
+          .then((value) {
+          print(value.data());
+          print(value.data()!['name']);
+          currentUser = value.data()!['name'];
+          user = value.data();
+        })
+      : await _firestore
+          .collection("teachers")
+          .doc(auth.currentUser!.uid)
+          .get()
+          .then((value) {
+          print(value.data());
+          print(value.data()!['name']);
+          currentUser = value.data()!['name'];
+          user = value.data();
+        });
+
+  if (message.text.isNotEmpty || imageUrl != null) {
+    final DateTime now = DateTime.now();
+    Map<String, dynamic> messages = {
+      'id': id,
+      "sendby": user['role'].toString(),
+      'to': to,
+      'type': type,
+      'solved': false,
+      "message": message.text,
+      "time": '${now.hour} : ${now.minute}',
+      'name': user['name'].toString(),
+      'image_url': imageUrl,
+      'servertimestamp': FieldValue.serverTimestamp(),
+      'searchKeywords': '{$messageTitle[0]}'
+    };
+    message.clear();
+    await _firestore
+        .collection('Forum')
+        .doc(docId)
+        .collection('solutions')
+        .add(messages);
+  } else {
+    print('Error in text');
+  }
+}
 
 void getUser() async {
   _firestore.collection("users").doc(auth.currentUser!.uid).get().then((value) {
@@ -35,7 +85,7 @@ void onSendMessage() async {
   print('--this is role-------$role');
   role == 'student'
       ? await _firestore
-          .collection("users")
+          .collection("Users")
           .doc(auth.currentUser!.uid)
           .get()
           .then((value) {
@@ -60,28 +110,30 @@ void onSendMessage() async {
     final DateTime now = DateTime.now();
     print('this is user data inside doubts----------------------------------');
     print(user['name']);
-    if (message.text.isNotEmpty) {
-      if (message.text == "https://meet.google.com/wax-ncmq-eim") {
-        print(message.text);
-        if(user['role']=='student'){
-          id = user['messageId'];
+    print('this is type--$type');
+    if (type != 'forumDoubt') {
+      if (message.text.isNotEmpty) {
+        if (message.text == "https://meet.google.com/wax-ncmq-eim") {
+          print(message.text);
+          if (user['role'] == 'student') {
+            id = user['messageId'];
+          }
+          type = 'link';
+        } else {
+          if (user['role'] == 'student') {
+            id = user['messageId'];
+          }
+          type = 'message';
+          print(message.text);
         }
-        
-        type = 'link';
-      } else {
-        if(user['role']=='student'){
-          id = user['messageId'];
-        }
-        type = 'message';
-        print(message.text);
+      } else if (messageTitle.text.isNotEmpty) {
+        id = Random().nextInt(100000);
+        _firestore
+            .collection("users")
+            .doc(auth.currentUser!.uid)
+            .update({'messageId': id});
+        type = 'doubt';
       }
-    } else if (messageTitle.text.isNotEmpty) {
-      id = Random().nextInt(100000);
-      _firestore
-          .collection("users")
-          .doc(auth.currentUser!.uid)
-          .update({'messageId': id});
-      type = 'doubt';
     }
     for (int i = 0; i < messageTitle.toString().length; i++) {}
     Map<String, dynamic> messages = {
@@ -98,7 +150,7 @@ void onSendMessage() async {
       'studentKey':
           '${user['year']} ${user['branch']} ${user['div']} ${user['roll']}',
       'image_url': imageUrl,
-      'servertimestamp':FieldValue.serverTimestamp(),
+      'servertimestamp': FieldValue.serverTimestamp(),
       'searchKeywords': '{$messageTitle[0]}'
     };
     message.clear();
@@ -107,10 +159,9 @@ void onSendMessage() async {
     imageUrl = null;
     if (type == 'doubt') {
       addDoubts(messages);
+    } else if (type == 'forumDoubt') {
+      addForumDoubts(messages);
     }
-
-    type = null;
-
     await _firestore
         .collection('chatroom')
         .doc(roomId)
@@ -118,6 +169,8 @@ void onSendMessage() async {
         .doc(roomId)
         .collection('doubts')
         .add(messages);
+
+    type = null;
   } else {
     print('Enter Some Text');
   }
@@ -125,6 +178,10 @@ void onSendMessage() async {
 
 void addDoubts(Map<String, dynamic> doubtmessage) async {
   await _firestore.collection('doubts').add(doubtmessage);
+}
+
+void addForumDoubts(Map<String, dynamic> doubtmessage) async {
+  await _firestore.collection('Forum').add(doubtmessage);
 }
 
 void uploadImage() async {
@@ -154,6 +211,10 @@ void uploadImage() async {
 
       imageUrl = downloadUrl;
       print(imageUrl);
+
+      if (type == 'forumDoubt') {
+        onProvideSolution(docId);
+      }
     } else {
       print('No Path Received');
     }

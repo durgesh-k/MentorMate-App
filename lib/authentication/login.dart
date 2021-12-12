@@ -216,7 +216,7 @@ class _LoginState extends State<Login> {
                           var teacherMap;
                           role == 'student'
                               ? await FirebaseFirestore.instance
-                                  .collection("users")
+                                  .collection("Users")
                                   .doc(auth.currentUser!.uid)
                                   .get()
                                   .then((value) {

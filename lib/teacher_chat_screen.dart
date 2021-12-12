@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -10,13 +11,18 @@ import 'package:mentor_mate/chat_screen.dart';
 import 'package:mentor_mate/components/bottom_drawer.dart';
 import 'package:mentor_mate/components/popup.dart';
 import 'package:mentor_mate/globals.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class TeacherChatScreen extends StatefulWidget {
   final Map<String, dynamic>? userMap;
   //int id;
   String? chatRoomId;
 
-  TeacherChatScreen({this.chatRoomId, this.userMap, /*required this.id*/});
+  TeacherChatScreen({
+    this.chatRoomId,
+    this.userMap,
+    /*required this.id*/
+  });
   @override
   _TeacherChatScreenState createState() => _TeacherChatScreenState();
 }
@@ -150,7 +156,13 @@ class _TeacherChatScreenState extends State<TeacherChatScreen> {
                           return Container();
                         }
                       })),
-              Container(width: width, child: TextInput2(id: widget.userMap!['id'],)),
+              Container(
+                  height: 80,
+                  width: width,
+                  color: grey,
+                  child: TextInput2(
+                    id: widget.userMap!['id'],
+                  )),
             ],
           ),
         ],
@@ -170,6 +182,49 @@ class _TextInput2State extends State<TextInput2> {
   File? _image;
   final _picker = ImagePicker();
 
+  void uploadImage() async {
+    final _storage = FirebaseStorage.instance;
+    final _picker = ImagePicker();
+    PickedFile image;
+
+    //Check Permissions
+    await Permission.photos.request();
+
+    var permissionStatus = await Permission.photos.status;
+
+    if (permissionStatus.isGranted) {
+      //Select Image
+      image = (await _picker.getImage(source: ImageSource.gallery))!;
+      var file = File(image.path);
+      var filename = image.path.split('/').last;
+
+      if (image != null) {
+        setState(() {
+          loader = true;
+        });
+        //Upload to Firebase
+        var snapshot = await _storage
+            .ref()
+            .child('$filename')
+            .putFile(file)
+            .whenComplete(() {
+          setState(() {
+            loader = false;
+          });
+        });
+
+        var downloadUrl = await snapshot.ref.getDownloadURL();
+
+        imageUrl = downloadUrl;
+        print(imageUrl);
+      } else {
+        print('No Path Received');
+      }
+    } else {
+      print('Grant Permissions and try again');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -181,8 +236,7 @@ class _TextInput2State extends State<TextInput2> {
       child: Container(
         height: height * 0.058, //50
         width: width,
-        decoration:
-            BoxDecoration(color: grey, borderRadius: BorderRadius.circular(10)),
+
         child: Padding(
           padding: EdgeInsets.symmetric(
               horizontal: width * 0.03, vertical: height * 0.014), //12 12

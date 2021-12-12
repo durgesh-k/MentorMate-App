@@ -30,6 +30,7 @@ TextEditingController messageDescription = TextEditingController();
 String? type;
 String? role;
 String? imageUrl;
+String? docId;
 const String? meetlink = "https://meet.google.com/wax-ncmq-eim";
 String? to;
 int? id;

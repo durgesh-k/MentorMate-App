@@ -9,9 +9,12 @@ import 'package:mentor_mate/chat/firebase.dart';
 import 'package:mentor_mate/components/bottom_drawer.dart';
 import 'package:mentor_mate/components/popup.dart';
 import 'package:mentor_mate/models/models.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'globals.dart';
+
 //this file has the chat screen
+var loader;
 
 class ChatScreen extends StatefulWidget {
   final Map<String, dynamic>? userMap;
@@ -75,7 +78,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   InkWell(
                     onTap: () {
                       setState(() {
-                        type = _heroDoubt;
+                        type = 'doubt';
                         Drawerclass.showMenu = true;
                       });
                     },
@@ -128,6 +131,11 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Column(
             children: [
+              Container(
+                height: 1,
+                width: width,
+                color: grey,
+              ),
               Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                       stream: _firestore
@@ -182,7 +190,8 @@ class _ChatScreenState extends State<ChatScreen> {
                           return Container();
                         }
                       })),
-              Container(width: width, child: TextInput()),
+              Container(
+                  height: 80, color: grey, width: width, child: TextInput()),
             ],
           ),
 
@@ -218,7 +227,25 @@ class _MessageState extends State<Message> {
             ? Alignment.topRight
             : Alignment.topLeft,
         child: (widget.map['image_url'] != null)
-            ? Image.network(widget.map['image_url']!)
+            ? Container(
+                decoration: BoxDecoration(
+                    color: grey, borderRadius: BorderRadius.circular(10)),
+                width: 200,
+                height: 200,
+                child: Center(
+                    child: loader == true
+                        ? CircularProgressIndicator()
+                        : Container(
+                            decoration: BoxDecoration(
+                                color: grey,
+                                borderRadius: BorderRadius.circular(10)),
+                            width: 180,
+                            height: 180,
+                            child: Image.network(
+                              widget.map['image_url'],
+                              fit: BoxFit.cover,
+                            ),
+                          )))
             : Container(
                 constraints: BoxConstraints(
                     maxWidth: width * 0.71, minWidth: width * 0.25), //280 100
@@ -331,6 +358,8 @@ class _DoubtMessageState extends State<DoubtMessage> {
 }
 
 class TextInput extends StatefulWidget {
+  final String? docId;
+  const TextInput({this.docId});
   @override
   _TextInputState createState() => _TextInputState();
 }
@@ -338,69 +367,115 @@ class TextInput extends StatefulWidget {
 class _TextInputState extends State<TextInput> {
   File? _image;
   final _picker = ImagePicker();
+  void uploadImage() async {
+    final _storage = FirebaseStorage.instance;
+    final _picker = ImagePicker();
+    PickedFile image;
+
+    //Check Permissions
+    await Permission.photos.request();
+
+    var permissionStatus = await Permission.photos.status;
+
+    if (permissionStatus.isGranted) {
+      //Select Image
+      image = (await _picker.getImage(source: ImageSource.gallery))!;
+      var file = File(image.path);
+      var filename = image.path.split('/').last;
+
+      if (image != null) {
+        setState(() {
+          loader = true;
+        });
+        //Upload to Firebase
+        var snapshot = await _storage
+            .ref()
+            .child('$filename')
+            .putFile(file)
+            .whenComplete(() {
+          setState(() {
+            loader = false;
+          });
+        });
+
+        var downloadUrl = await snapshot.ref.getDownloadURL();
+
+        imageUrl = downloadUrl;
+        print(imageUrl);
+      } else {
+        print('No Path Received');
+      }
+    } else {
+      print('Grant Permissions and try again');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     final grey = const Color(0xFFe0e3e3).withOpacity(0.5);
-    return Padding(
-      padding: EdgeInsets.symmetric(
-          horizontal: width * 0.045, vertical: height * 0.021), //18 18
-      child: Container(
-        height: height * 0.058, //50
-        width: width,
-        decoration:
-            BoxDecoration(color: grey, borderRadius: BorderRadius.circular(10)),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: width * 0.03, vertical: height * 0.014), //12 12
-          child: Row(
-            //crossAxisAlignment: CrossAxisAlignment.baseline,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              InkWell(
-                onTap: () {
-                  uploadImage();
-                },
+    return Container(
+      height: height * 0.058, //50
+      width: width,
+      decoration: BoxDecoration(color: Colors.transparent),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+            horizontal: width * 0.03, vertical: height * 0.014), //12 12
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            InkWell(
+              onTap: () {
+                setState(() {
+                  type = 'forumDoubt';
+                });
+                uploadImage();
+              },
+              child: Container(
+                height: height * 0.028, //24
+                child: SvgPicture.asset('assets/paperclip.svg'),
+              ),
+            ),
+            SizedBox(
+              width: width * 0.025, //10
+            ),
+            Flexible(
+              /*height: 50,
+              width: 200,*/
+              child: TextFormField(
+                controller: message,
+                style: TextStyle(
+                    fontFamily: "Montserrat",
+                    fontSize: width * 0.045, //18
+                    color: Colors.black),
+                decoration: InputDecoration(
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    hintStyle: TextStyle(
+                        fontFamily: "Montserrat",
+                        fontSize: width * 0.045, //18
+                        color: Colors.black.withOpacity(0.3)),
+                    hintText: "Type Something ....."),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                setState(() {
+                  type = 'message';
+                });
+                if (widget.docId != null) {
+                  onProvideSolution(widget.docId);
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
                 child: Container(
-                  height: height * 0.028, //24
-                  child: SvgPicture.asset('assets/paperclip.svg'),
-                ),
-              ),
-              SizedBox(
-                width: width * 0.025, //10
-              ),
-              Flexible(
-                /*height: 50,
-                width: 200,*/
-                child: TextFormField(
-                  controller: message,
-                  style: TextStyle(
-                      fontFamily: "Montserrat",
-                      fontSize: width * 0.045, //18
-                      color: Colors.black),
-                  decoration: InputDecoration(
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      errorBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      hintStyle: TextStyle(
-                          fontFamily: "Montserrat",
-                          fontSize: width * 0.045, //18
-                          color: Colors.black.withOpacity(0.3)),
-                      hintText: "Type Something ....."),
-                ),
-              ),
-              InkWell(
-                onTap: () {
-                  setState(() {
-                    type = 'message';
-                  });
-                  onSendMessage();
-                },
-                child: Container(
+                  alignment: Alignment.center,
                   height: height * 0.058, //50
                   width: width * 0.101, //40
                   child: Text(
@@ -411,9 +486,9 @@ class _TextInputState extends State<TextInput> {
                         color: Colors.black),
                   ),
                 ),
-              )
-            ],
-          ),
+              ),
+            )
+          ],
         ),
       ),
     );
