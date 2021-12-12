@@ -742,7 +742,7 @@ class _TextInputForumState extends State<TextInputForum> {
     double width = MediaQuery.of(context).size.width;
     final grey = const Color(0xFFe0e3e3).withOpacity(0.5);
     return Container(
-      height: height * 0.058, //50
+      height: 80, //50
       width: width,
       decoration: BoxDecoration(color: Colors.transparent),
       child: Padding(
