@@ -248,6 +248,7 @@ class _TextInput2State extends State<TextInput2> {
               InkWell(
                 onTap: () {
                   uploadImage();
+                  //onSendMessage();
                 },
                 child: Container(
                   height: height * 0.028, //24

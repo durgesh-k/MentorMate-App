@@ -429,10 +429,8 @@ class _TextInputState extends State<TextInput> {
           children: [
             InkWell(
               onTap: () {
-                setState(() {
-                  type = 'forumDoubt';
-                });
                 uploadImage();
+                //onSendMessage();
               },
               child: Container(
                 height: height * 0.028, //24
