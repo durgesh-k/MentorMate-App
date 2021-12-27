@@ -18,31 +18,47 @@ class RequestList extends StatefulWidget {
 class _RequestListState extends State<RequestList> {
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection('request').snapshots(),
-          builder: (ctx, AsyncSnapshot<QuerySnapshot> usersnapshot) {
-            if (usersnapshot.connectionState == ConnectionState.waiting) {
-              return Container(
-                height: 0,
-              );
-            } else {
-              return Expanded(
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: usersnapshot.data?.docs.length,
-                    itemBuilder: (BuildContext context, index) {
-                      Map<String, dynamic> map = usersnapshot.data!.docs[index]
-                          .data() as Map<String, dynamic>;
-                      print('--------------this is map-------');
-                      print(map);
-                      return map['to'] == widget.teacherMap['name']
-                          ? RequestSentCard(map: map)
-                          : Container(height: 0);
-                    }),
-              );
-            }
-          }),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Text(
+            'Meet Requests',
+            style: TextStyle(fontFamily: "MontserratB", color: Colors.black),
+          ),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
+      ),
+      body: Expanded(
+        child: StreamBuilder<QuerySnapshot>(
+            stream:
+                FirebaseFirestore.instance.collection('request').snapshots(),
+            builder: (ctx, AsyncSnapshot<QuerySnapshot> usersnapshot) {
+              if (usersnapshot.connectionState == ConnectionState.waiting) {
+                return Container(
+                  height: 0,
+                );
+              } else {
+                return Expanded(
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: usersnapshot.data?.docs.length,
+                      itemBuilder: (BuildContext context, index) {
+                        Map<String, dynamic> map =
+                            usersnapshot.data!.docs[index].data()
+                                as Map<String, dynamic>;
+                        print('--------------this is map-------');
+                        print(map);
+                        return map['to'] == widget.teacherMap['name']
+                            ? RequestSentCard(map: map)
+                            : Container(height: 0);
+                      }),
+                );
+              }
+            }),
+      ),
     );
   }
 }

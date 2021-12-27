@@ -52,33 +52,17 @@ class _FormDartState extends State<FormDart> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-          title: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Text(
-              'Forum',
-              style: TextStyle(fontFamily: "MontserratB", color: Colors.black),
-            ),
+        title: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Text(
+            'Forum',
+            style: TextStyle(fontFamily: "MontserratB", color: Colors.black),
           ),
-          elevation: 0,
-          backgroundColor: Colors.white,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: InkWell(
-                onTap: () {
-                  logOut(context);
-                  setState(() {
-                    role = '';
-                  });
-                },
-                child: Icon(
-                  PhosphorIcons.sign_out,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ]
-          /*leading: InkWell(
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
+
+        /*leading: InkWell(
             customBorder: new CircleBorder(),
             splashColor: Colors.black.withOpacity(0.2),
             onTap: () {
@@ -90,7 +74,7 @@ class _FormDartState extends State<FormDart> {
                 decoration:
                     BoxDecoration(borderRadius: BorderRadius.circular(20)),
                 child: Center(child: SvgPicture.asset('assets/back.svg')))),*/
-          ),
+      ),
       body: Stack(children: [
         Column(
           children: [

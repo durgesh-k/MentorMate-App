@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:mentor_mate/authentication/authenticate.dart';
 import 'package:mentor_mate/chat/firebase.dart';
 import 'package:mentor_mate/chat_screen.dart';
@@ -18,6 +20,11 @@ import 'package:titled_navigation_bar/titled_navigation_bar.dart';
 
 var currentName;
 var currentYear;
+final _advancedDrawerController = AdvancedDrawerController();
+
+void _handleMenuButtonPressed() {
+  _advancedDrawerController.showDrawer();
+}
 
 class StudentHomePage extends StatefulWidget {
   Map<String, dynamic> userMap;
@@ -101,6 +108,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(
+            height: 30,
+          ),
           Text(
             "Welcome,",
             style: TextStyle(
@@ -239,9 +249,15 @@ class _StudentHomeState extends State<StudentHome> {
     print(documents);
   }
 
+  final _advancedDrawerController = AdvancedDrawerController();
+
 //these two variables are related to animations
   Tween<Offset> _offset = Tween(begin: Offset(-1, 0), end: Offset(0, 0));
   GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+
+  void _handleMenuButtonPressed() {
+    _advancedDrawerController.showDrawer();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -249,109 +265,219 @@ class _StudentHomeState extends State<StudentHome> {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        brightness: Brightness.dark,
-        elevation: 0,
-        backgroundColor: Colors.white,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18.0),
-            child: Row(
+    return AdvancedDrawer(
+      backdropColor: Colors.white,
+      controller: _advancedDrawerController,
+      animationCurve: Curves.easeInOut,
+      animationDuration: const Duration(milliseconds: 300),
+      animateChildDecoration: true,
+      rtlOpening: false,
+      disabledGestures: false,
+      childDecoration: BoxDecoration(
+        //border: Border.all(width: 2, color: Colors.black.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade900.withOpacity(0.05),
+            blurRadius: 20.0,
+            spreadRadius: 5.0,
+            offset: Offset(-20.0, 0.0),
+          ),
+        ],
+        borderRadius: BorderRadius.circular(30),
+      ),
+      drawer: SafeArea(
+          child: Padding(
+        padding: const EdgeInsets.all(28.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SizedBox(
+                  height: 120,
+                ),
+                Text(
+                  "Logged is as",
+                  style: TextStyle(
+                    fontFamily: "MontserratB",
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black.withOpacity(0.15),
+                  ),
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                Text(
+                  widget.userMap['name'],
+                  style: TextStyle(
+                    fontFamily: "MontserratB",
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Text(
+                  FirebaseAuth.instance.currentUser!.email!,
+                  style: TextStyle(
+                    fontFamily: "MontserratT",
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(
+                  height: 50,
+                ),
                 InkWell(
                     onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => QuizRoute()));
+                      logOut(context);
+                      setState(() {
+                        role = '';
+                      });
                     },
                     child: Container(
                       height: 40,
-                      width: 70,
+                      width: 120,
                       decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(40),
                           border: Border.all(color: Colors.black)),
                       child: Center(
-                        child: Text(
-                          'Quiz',
-                          style: TextStyle(
-                              fontFamily: 'MontserratSB', color: Colors.black),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              PhosphorIcons.sign_out,
+                              color: Colors.black,
+                            ),
+                            SizedBox(
+                              width: 6,
+                            ),
+                            Text(
+                              'Logout',
+                              style: TextStyle(
+                                  fontFamily: 'MontserratSB',
+                                  color: Colors.black),
+                            ),
+                          ],
                         ),
                       ),
                     )),
                 SizedBox(
-                  width: 10,
-                ),
-                InkWell(
-                  onTap: () {
-                    logOut(context);
-                    setState(() {
-                      role = '';
-                    });
-                  },
-                  child: Icon(
-                    PhosphorIcons.sign_out,
-                    color: Colors.black,
-                  ),
+                  height: 100,
                 ),
               ],
             ),
-          )
-        ],
+            AnimatedOpacity(
+              opacity: 0.2,
+              duration: Duration(),
+              child: Container(
+                height: 60,
+                width: 60,
+                child: Image.asset(
+                  'assets/logo.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+            )
+          ],
+        ),
+      )),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          brightness: Brightness.dark,
+          elevation: 0,
+          backgroundColor: Colors.white,
+          leading: IconButton(
+            color: Colors.black,
+            onPressed: _handleMenuButtonPressed,
+            icon: ValueListenableBuilder<AdvancedDrawerValue>(
+              valueListenable: _advancedDrawerController,
+              builder: (_, value, __) {
+                return AnimatedSwitcher(
+                  duration: Duration(milliseconds: 250),
+                  child: Icon(
+                    value.visible ? Iconsax.close_square : Iconsax.menu,
+                    key: ValueKey<bool>(value.visible),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        body: PageView(
+            controller: _pageController,
+            onPageChanged: (value) {
+              //_currentPage = value;
+              setState(() {
+                _currentPage = value;
+              });
+              /*_pageController!.animateTo(value.toDouble(),
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.bounceIn);*/
+            },
+            children: [
+              StudentHomePage(userMap: widget.userMap),
+              FormDart(teacherMap: widget.userMap),
+              QuizRoute()
+            ]),
+        bottomNavigationBar: TitledBottomNavigationBar(
+            indicatorColor: Colors.black,
+            enableShadow: false,
+            activeColor: Colors.black,
+            currentIndex: _currentPage!,
+            onTap: (index) {
+              setState(() {
+                _currentPage = index;
+                _pageController!.animateToPage(index,
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.bounceInOut);
+              });
+            },
+            items: [
+              TitledNavigationBarItem(
+                  title: Text(
+                    'Home',
+                    style: TextStyle(
+                      fontFamily: "MontserratT",
+                      fontSize: width * 0.046, //30
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  icon: Icon(PhosphorIcons.house_bold)),
+              TitledNavigationBarItem(
+                  title: Text(
+                    'Forums',
+                    style: TextStyle(
+                      fontFamily: "MontserratT",
+                      fontSize: width * 0.046, //30
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  icon: Icon(PhosphorIcons.chats_bold)),
+              TitledNavigationBarItem(
+                title: Text(
+                  'Quiz',
+                  style: TextStyle(
+                    fontFamily: "MontserratT",
+                    fontSize: width * 0.046, //30
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                icon: Icon(PhosphorIcons.clipboard_text_bold),
+              )
+            ]),
       ),
-      body: PageView(
-          controller: _pageController,
-          onPageChanged: (value) {
-            //_currentPage = value;
-            setState(() {
-              _currentPage = value;
-            });
-            /*_pageController!.animateTo(value.toDouble(),
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.bounceIn);*/
-          },
-          children: [
-            StudentHomePage(userMap: widget.userMap),
-            FormDart(teacherMap: widget.userMap)
-          ]),
-      bottomNavigationBar: TitledBottomNavigationBar(
-          indicatorColor: Colors.black,
-          enableShadow: false,
-          activeColor: Colors.black,
-          currentIndex: _currentPage!,
-          onTap: (index) {
-            setState(() {
-              _currentPage = index;
-              _pageController!.animateToPage(index,
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.bounceInOut);
-            });
-          },
-          items: [
-            TitledNavigationBarItem(
-                title: Text(
-                  'Home',
-                  style: TextStyle(
-                    fontFamily: "MontserratT",
-                    fontSize: width * 0.046, //30
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                icon: Icon(PhosphorIcons.house_bold)),
-            TitledNavigationBarItem(
-                title: Text(
-                  'Forums',
-                  style: TextStyle(
-                    fontFamily: "MontserratT",
-                    fontSize: width * 0.046, //30
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                icon: Icon(PhosphorIcons.chats_bold)),
-          ]),
     );
   }
 }
@@ -382,7 +508,7 @@ class _TeacherHomePageState extends State<TeacherHomePage>
       length: 4,
       child: Scaffold(
           appBar: PreferredSize(
-            preferredSize: Size.fromHeight(height! * 0.082), //70
+            preferredSize: Size.fromHeight(120), //70
             child: AppBar(
               actions: [
                 InkWell(
@@ -400,7 +526,46 @@ class _TeacherHomePageState extends State<TeacherHomePage>
               elevation: 0,
               flexibleSpace: SafeArea(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            color: Colors.black,
+                            onPressed: _handleMenuButtonPressed,
+                            icon: ValueListenableBuilder<AdvancedDrawerValue>(
+                              valueListenable: _advancedDrawerController,
+                              builder: (_, value, __) {
+                                return AnimatedSwitcher(
+                                  duration: Duration(milliseconds: 250),
+                                  child: Icon(
+                                    value.visible
+                                        ? Iconsax.close_square
+                                        : Iconsax.menu,
+                                    key: ValueKey<bool>(value.visible),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          IconButton(
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => RequestList(
+                                            teacherMap: widget.teacherMap)));
+                              },
+                              icon: Icon(
+                                Iconsax.notification_1,
+                                size: 20,
+                              ))
+                        ],
+                      ),
+                    ),
                     SizedBox(
                       height: height! * 0.018, //16
                     ),
@@ -473,95 +638,220 @@ class _TeacherHomeState extends State<TeacherHome>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-
-      body: PageView(
-          controller: _pageControllerT,
-          onPageChanged: (value) {
-            setState(() {
-              _currentIndex = value;
-            });
-            /*if (value == 0) {
-              setState(() {
-                showTabs = true;
-              });
-            } else {
-              setState(() {
-                showTabs = false;
-              });
-            }*/
-          },
+    return AdvancedDrawer(
+      backdropColor: Colors.white,
+      controller: _advancedDrawerController,
+      animationCurve: Curves.easeInOut,
+      animationDuration: const Duration(milliseconds: 300),
+      animateChildDecoration: true,
+      rtlOpening: false,
+      disabledGestures: false,
+      childDecoration: BoxDecoration(
+        //border: Border.all(width: 2, color: Colors.black.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade900.withOpacity(0.05),
+            blurRadius: 20.0,
+            spreadRadius: 5.0,
+            offset: Offset(-20.0, 0.0),
+          ),
+        ],
+        borderRadius: BorderRadius.circular(30),
+      ),
+      drawer: SafeArea(
+          child: Padding(
+        padding: const EdgeInsets.all(28.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            TeacherHomePage(teacherMap: widget.teacherMap),
-            FormDart(teacherMap: widget.teacherMap)
-
-            // Positioned(
-            //     top: height! * 0.082, //70
-            //     child: RequestList(teacherMap: widget.teacherMap))
-          ]),
-      bottomNavigationBar: TitledBottomNavigationBar(
-          indicatorColor: Colors.black,
-          enableShadow: false,
-          activeColor: Colors.black,
-          currentIndex: _currentIndex!,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-              _pageControllerT!.animateToPage(index,
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.bounceInOut);
-            });
-          },
-          items: [
-            TitledNavigationBarItem(
-                title: Text(
-                  'Home',
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 120,
+                ),
+                Text(
+                  "Logged is as",
                   style: TextStyle(
-                    fontFamily: "MontserratT",
-                    fontSize: width! * 0.046, //30
+                    fontFamily: "MontserratB",
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black.withOpacity(0.15),
+                  ),
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                Text(
+                  widget.teacherMap['name'],
+                  style: TextStyle(
+                    fontFamily: "MontserratB",
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
-                icon: Icon(PhosphorIcons.house_bold)),
-            TitledNavigationBarItem(
-                title: Text(
-                  'Forums',
+                SizedBox(
+                  height: 5,
+                ),
+                Text(
+                  FirebaseAuth.instance.currentUser!.email!,
                   style: TextStyle(
                     fontFamily: "MontserratT",
-                    fontSize: width! * 0.046, //30
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
-                icon: Icon(PhosphorIcons.chats_bold)),
-          ]),
+                SizedBox(
+                  height: 50,
+                ),
+                InkWell(
+                    onTap: () {
+                      logOut(context);
+                      setState(() {
+                        role = '';
+                      });
+                    },
+                    child: Container(
+                      height: 40,
+                      width: 120,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(40),
+                          border: Border.all(color: Colors.black)),
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              PhosphorIcons.sign_out,
+                              color: Colors.black,
+                            ),
+                            SizedBox(
+                              width: 6,
+                            ),
+                            Text(
+                              'Logout',
+                              style: TextStyle(
+                                  fontFamily: 'MontserratSB',
+                                  color: Colors.black),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )),
+                SizedBox(
+                  height: 100,
+                ),
+              ],
+            ),
+            AnimatedOpacity(
+              opacity: 0.2,
+              duration: Duration(),
+              child: Container(
+                height: 60,
+                width: 60,
+                child: Image.asset(
+                  'assets/logo.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+            )
+          ],
+        ),
+      )),
+      child: Scaffold(
+        backgroundColor: Colors.white,
 
-      // floatingActionButton: Padding(
-      //   padding: const EdgeInsets.only(left: 26.0),
-      //   child: Column(
-      //     crossAxisAlignment: CrossAxisAlignment.center,
-      //     mainAxisAlignment: MainAxisAlignment.end,
-      //     children: [
-      //       Center(
-      //           child: FloatingActionButton(
-      //         onPressed: () {
-      //           Navigator.push(
-      //               context,
-      //               MaterialPageRoute(
-      //                   builder: (_) => FormDart(
-      //                         teacherMap: widget.teacherMap,
-      //                       )));
-      //         },
-      //         shape: RoundedRectangleBorder(
-      //             borderRadius: BorderRadius.circular(18),
-      //             side: BorderSide(color: Colors.white)),
-      //       )
-      //       ),
-      //     ],
-      //   ),
-      // )
+        body: PageView(
+            controller: _pageControllerT,
+            onPageChanged: (value) {
+              setState(() {
+                _currentIndex = value;
+              });
+              /*if (value == 0) {
+                setState(() {
+                  showTabs = true;
+                });
+              } else {
+                setState(() {
+                  showTabs = false;
+                });
+              }*/
+            },
+            children: [
+              TeacherHomePage(teacherMap: widget.teacherMap),
+              FormDart(teacherMap: widget.teacherMap)
+
+              // Positioned(
+              //     top: height! * 0.082, //70
+              //     child: RequestList(teacherMap: widget.teacherMap))
+            ]),
+        bottomNavigationBar: TitledBottomNavigationBar(
+            indicatorColor: Colors.black,
+            enableShadow: false,
+            activeColor: Colors.black,
+            currentIndex: _currentIndex!,
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index;
+                _pageControllerT!.animateToPage(index,
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.bounceInOut);
+              });
+            },
+            items: [
+              TitledNavigationBarItem(
+                  title: Text(
+                    'Home',
+                    style: TextStyle(
+                      fontFamily: "MontserratT",
+                      fontSize: width! * 0.046, //30
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  icon: Icon(PhosphorIcons.house_bold)),
+              TitledNavigationBarItem(
+                  title: Text(
+                    'Forums',
+                    style: TextStyle(
+                      fontFamily: "MontserratT",
+                      fontSize: width! * 0.046, //30
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  icon: Icon(PhosphorIcons.chats_bold)),
+            ]),
+
+        // floatingActionButton: Padding(
+        //   padding: const EdgeInsets.only(left: 26.0),
+        //   child: Column(
+        //     crossAxisAlignment: CrossAxisAlignment.center,
+        //     mainAxisAlignment: MainAxisAlignment.end,
+        //     children: [
+        //       Center(
+        //           child: FloatingActionButton(
+        //         onPressed: () {
+        //           Navigator.push(
+        //               context,
+        //               MaterialPageRoute(
+        //                   builder: (_) => FormDart(
+        //                         teacherMap: widget.teacherMap,
+        //                       )));
+        //         },
+        //         shape: RoundedRectangleBorder(
+        //             borderRadius: BorderRadius.circular(18),
+        //             side: BorderSide(color: Colors.white)),
+        //       )
+        //       ),
+        //     ],
+        //   ),
+        // )
+      ),
     );
   }
 }
