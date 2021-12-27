@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mentor_mate/chat/firebase.dart';
 import 'package:mentor_mate/chat_screen.dart';
+import 'package:mentor_mate/components/imageLarge.dart';
 import 'package:mentor_mate/globals.dart';
 import 'package:mentor_mate/teacher_chat_screen.dart';
 
@@ -75,13 +76,15 @@ class _DoubtsState extends State<Doubts> {
                   height: height * 0.023, //20
                   width: width * 0.05, //20
                   child: Center(
-                    child: widget.map['solved']?SvgPicture.asset(
-                      'assets/tick.svg',
-                      height: 5,
-                    ): SvgPicture.asset(
-                      'assets/round.svg',
-                      height: 5,
-                    ),
+                    child: widget.map['solved']
+                        ? SvgPicture.asset(
+                            'assets/tick.svg',
+                            height: 5,
+                          )
+                        : SvgPicture.asset(
+                            'assets/round.svg',
+                            height: 5,
+                          ),
                   ),
                 ),
                 Text(widget.map['title'],
@@ -115,7 +118,22 @@ class _DoubtsState extends State<Doubts> {
                       color: Colors.black.withOpacity(0.3))),
             ),
             (widget.map['image_url'] != null)
-                ? Image.network(widget.map['image_url']!)
+                ? Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => ImageLarge(
+                                    imageurl: widget.map['image_url'],
+                                  )));
+                        },
+                        child: Hero(
+                            tag: widget.map['image_url'],
+                            child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child:
+                                    Image.network(widget.map['image_url']!)))),
+                  )
                 : Container(
                     height: 0,
                   ),
@@ -124,15 +142,17 @@ class _DoubtsState extends State<Doubts> {
                   left: width * 0.05, top: height * 0.011), //20 10
               child: InkWell(
                 onTap: () {
+                  print(
+                      'checkhere--${widget.teacherMap['uid']} ${widget.map['uid']}');
                   String roomId2 =
-                      chatRoomId(widget.teacherMap['name'], widget.map['name']);
+                      chatRoomId(widget.teacherMap['uid'], widget.map['uid']);
                   print("this is chatroomid");
                   print(roomId2);
                   setState(() {
                     roomId = roomId2;
                     id = widget.map['id'];
-                        print('this is setState id');
-                        print(id);
+                    print('this is setState id');
+                    print(id);
                     to = widget.map['name'];
                     print(roomId2);
                     print(

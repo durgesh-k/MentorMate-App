@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mentor_mate/chat/firebase.dart';
 import 'package:mentor_mate/components/bottom_drawer.dart';
+import 'package:mentor_mate/components/imageLarge.dart';
 import 'package:mentor_mate/components/popup.dart';
 import 'package:mentor_mate/models/models.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -192,7 +193,12 @@ class _ChatScreenState extends State<ChatScreen> {
                         }
                       })),
               Container(
-                  height: 80, color: grey, width: width, child: TextInput()),
+                  height: 80,
+                  color: grey,
+                  width: width,
+                  child: TextInput(
+                    chatroomId: widget.chatRoomId,
+                  )),
             ],
           ),
 
@@ -228,25 +234,39 @@ class _MessageState extends State<Message> {
             ? Alignment.topRight
             : Alignment.topLeft,
         child: (widget.map['image_url'] != null)
-            ? Container(
-                decoration: BoxDecoration(
-                    color: grey, borderRadius: BorderRadius.circular(10)),
-                width: 200,
-                height: 200,
-                child: Center(
-                    child: loader == true
-                        ? CircularProgressIndicator()
-                        : Container(
-                            decoration: BoxDecoration(
-                                color: grey,
-                                borderRadius: BorderRadius.circular(10)),
-                            width: 180,
-                            height: 180,
-                            child: Image.network(
-                              widget.map['image_url'],
-                              fit: BoxFit.cover,
-                            ),
-                          )))
+            ? InkWell(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ImageLarge(
+                            imageurl: widget.map['image_url'],
+                          )));
+                },
+                child: Container(
+                    decoration: BoxDecoration(
+                        color: grey, borderRadius: BorderRadius.circular(10)),
+                    width: 200,
+                    height: 200,
+                    child: Center(
+                        child: loader == true
+                            ? CircularProgressIndicator()
+                            : Container(
+                                decoration: BoxDecoration(
+                                    color: grey,
+                                    borderRadius: BorderRadius.circular(10)),
+                                width: 190,
+                                height: 190,
+                                child: Hero(
+                                  tag: widget.map['image_url'],
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(
+                                      widget.map['image_url'],
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ))),
+              )
             : Container(
                 constraints: BoxConstraints(
                     maxWidth: width * 0.71, minWidth: width * 0.25), //280 100
@@ -293,6 +313,7 @@ class _DoubtMessageState extends State<DoubtMessage> {
     double width = MediaQuery.of(context).size.width;
     return Container(
       width: width,
+      color: grey.withOpacity(0.3),
       child: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: width * 0.045, vertical: height * 0.021), //18 18
@@ -304,6 +325,7 @@ class _DoubtMessageState extends State<DoubtMessage> {
                 Container(
                   height: height * 0.023, //20
                   width: width * 0.05, //20
+
                   child: Center(
                     child: widget.map['solved']
                         ? SvgPicture.asset(
@@ -338,7 +360,41 @@ class _DoubtMessageState extends State<DoubtMessage> {
               ),
             ),
             (widget.map['image_url'] != null)
-                ? Image.network(widget.map['image_url']!)
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 18.0),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => ImageLarge(
+                                  imageurl: widget.map['image_url'],
+                                )));
+                      },
+                      child: Container(
+                          decoration: BoxDecoration(
+                              color: grey,
+                              borderRadius: BorderRadius.circular(10)),
+                          width: 300,
+                          height: 200,
+                          child: Center(
+                              child: loader == true
+                                  ? CircularProgressIndicator()
+                                  : Container(
+                                      decoration: BoxDecoration(
+                                          color: grey,
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
+                                      width: 290,
+                                      height: 190,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          widget.map['image_url'],
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ))),
+                    ),
+                  )
                 : Container(
                     height: 0,
                   ),
@@ -360,58 +416,13 @@ class _DoubtMessageState extends State<DoubtMessage> {
 
 class TextInput extends StatefulWidget {
   final String? docId;
-  const TextInput({this.docId});
+  final String? chatroomId;
+  const TextInput({this.docId, this.chatroomId});
   @override
   _TextInputState createState() => _TextInputState();
 }
 
 class _TextInputState extends State<TextInput> {
-  File? _image;
-  final _picker = ImagePicker();
-  /*void uploadImage() async {
-    final _storage = FirebaseStorage.instance;
-    final _picker = ImagePicker();
-    PickedFile image;
-
-    //Check Permissions
-    await Permission.photos.request();
-
-    var permissionStatus = await Permission.photos.status;
-
-    if (permissionStatus.isGranted) {
-      //Select Image
-      image = (await _picker.getImage(source: ImageSource.gallery))!;
-      var file = File(image.path);
-      var filename = image.path.split('/').last;
-
-      if (image != null) {
-        setState(() {
-          loader = true;
-        });
-        //Upload to Firebase
-        var snapshot = await _storage
-            .ref()
-            .child('$filename')
-            .putFile(file)
-            .whenComplete(() {
-          setState(() {
-            loader = false;
-          });
-        });
-
-        var downloadUrl = await snapshot.ref.getDownloadURL();
-
-        imageUrl = downloadUrl;
-        print(imageUrl);
-        onSendMessage();
-      } else {
-        print('No Path Received');
-      }
-    } else {
-      print('Grant Permissions and try again');
-    }
-  }*/
-
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -430,8 +441,10 @@ class _TextInputState extends State<TextInput> {
           children: [
             InkWell(
               onTap: () {
-                uploadImage();
+                //uploadImage();
                 //onSendMessage();
+
+                sendImage(widget.chatroomId);
               },
               child: Container(
                 height: height * 0.028, //24
@@ -468,8 +481,11 @@ class _TextInputState extends State<TextInput> {
                 setState(() {
                   type = 'message';
                 });
+                print('heredocid--${widget.docId}');
                 if (widget.docId != null) {
                   onProvideSolution(widget.docId);
+                } else {
+                  onSendMessage();
                 }
               },
               child: Padding(
@@ -529,12 +545,12 @@ class _MeetCardState extends State<MeetCard> {
                   horizontal: width * 0.04, vertical: height * 0.018), //16 16
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('This is your meeting link',
+                  Text('Click to join this link',
                       style: TextStyle(
                           fontFamily: "MontserratM",
-                          fontSize: 16, //18
+                          fontSize: 12, //18
                           color: Colors.black)),
                   SizedBox(height: 8), //8
                   Text(meetlink!,

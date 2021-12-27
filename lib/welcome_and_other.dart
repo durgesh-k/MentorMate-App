@@ -134,54 +134,27 @@ class _StudentorTeacherState extends State<StudentorTeacher> {
     return Scaffold(
       body: SafeArea(
           child: Center(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(28.0),
-              child: InkWell(
-                  radius: 320,
-                  splashColor: Colors.black.withOpacity(0.2),
-                  onTap: () {
-                    setState(() {
-                      role = 'student';
-                    });
-                    Authcheck.process == 'signup'
-                        ? Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SignUp(),
-                            ))
-                        : Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Login(),
-                            ));
-                  },
-                  child: Container(
-                      child: Text(
-                    'Student',
-                    style: TextStyle(
-                      fontFamily: "MontserratB",
-                      fontSize: 30,
-                      color: Colors.black,
-                    ),
-                  ))),
+            Text(
+              'Continue as ',
+              style: TextStyle(
+                fontFamily: "MontserratB",
+                fontSize: 36,
+                color: Colors.black.withOpacity(0.2),
+              ),
             ),
-            Container(
-              height: 40,
-              width: 1,
-              color: Colors.black.withOpacity(0.5),
+            SizedBox(
+              height: 30,
             ),
-            Padding(
-              padding: const EdgeInsets.all(28.0),
-              child: InkWell(
+            InkWell(
                 radius: 320,
                 splashColor: Colors.black.withOpacity(0.2),
                 onTap: () {
                   setState(() {
-                    role = 'teacher';
+                    role = 'student';
                   });
                   Authcheck.process == 'signup'
                       ? Navigator.push(
@@ -197,14 +170,44 @@ class _StudentorTeacherState extends State<StudentorTeacher> {
                 },
                 child: Container(
                     child: Text(
-                  'Teacher',
+                  '- Student',
                   style: TextStyle(
-                    fontFamily: "MontserratB",
-                    fontSize: 30,
+                    fontFamily: "MontserratSB",
+                    fontSize: 26,
                     color: Colors.black,
                   ),
-                )),
-              ),
+                ))),
+            SizedBox(
+              height: 12,
+            ),
+            InkWell(
+              radius: 320,
+              splashColor: Colors.black.withOpacity(0.2),
+              onTap: () {
+                setState(() {
+                  role = 'teacher';
+                });
+                Authcheck.process == 'signup'
+                    ? Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SignUp(),
+                        ))
+                    : Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Login(),
+                        ));
+              },
+              child: Container(
+                  child: Text(
+                '- Teacher',
+                style: TextStyle(
+                  fontFamily: "MontserratSB",
+                  fontSize: 26,
+                  color: Colors.black,
+                ),
+              )),
             ),
           ],
         ),

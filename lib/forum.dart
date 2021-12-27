@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:mentor_mate/authentication/authenticate.dart';
 import 'package:mentor_mate/chat/firebase.dart';
 import 'package:mentor_mate/chat_screen.dart';
 import 'package:mentor_mate/components/bottom_drawer.dart';
@@ -51,16 +52,33 @@ class _FormDartState extends State<FormDart> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Text(
-            'Forum',
-            style: TextStyle(fontFamily: "MontserratB", color: Colors.black),
+          title: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Text(
+              'Forum',
+              style: TextStyle(fontFamily: "MontserratB", color: Colors.black),
+            ),
           ),
-        ),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        /*leading: InkWell(
+          elevation: 0,
+          backgroundColor: Colors.white,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InkWell(
+                onTap: () {
+                  logOut(context);
+                  setState(() {
+                    role = '';
+                  });
+                },
+                child: Icon(
+                  PhosphorIcons.sign_out,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ]
+          /*leading: InkWell(
             customBorder: new CircleBorder(),
             splashColor: Colors.black.withOpacity(0.2),
             onTap: () {
@@ -72,7 +90,7 @@ class _FormDartState extends State<FormDart> {
                 decoration:
                     BoxDecoration(borderRadius: BorderRadius.circular(20)),
                 child: Center(child: SvgPicture.asset('assets/back.svg')))),*/
-      ),
+          ),
       body: Stack(children: [
         Column(
           children: [
@@ -316,7 +334,25 @@ class _ForumCardState extends State<ForumCard> {
                       color: Colors.black.withOpacity(0.3))),
             ),
             (widget.map['image_url'] != null)
-                ? Image.network(widget.map['image_url']!)
+                ? Container(
+                    decoration: BoxDecoration(
+                        color: grey, borderRadius: BorderRadius.circular(10)),
+                    width: 200,
+                    height: 200,
+                    child: Center(
+                        child: loader == true
+                            ? CircularProgressIndicator()
+                            : Container(
+                                decoration: BoxDecoration(
+                                    color: grey,
+                                    borderRadius: BorderRadius.circular(10)),
+                                width: 180,
+                                height: 180,
+                                child: Image.network(
+                                  widget.map['image_url'],
+                                  fit: BoxFit.cover,
+                                ),
+                              )))
                 : Container(
                     height: 0,
                   ),
@@ -505,7 +541,7 @@ class _ForumChatScreenState extends State<ForumChatScreen> {
                           .collection('Forum')
                           .doc(widget.chatRoomId)
                           .collection('solutions')
-                          .orderBy('time', descending: false)
+                          .orderBy('servertimestamp', descending: false)
                           .snapshots(),
                       builder: (BuildContext context,
                           AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -532,13 +568,16 @@ class _ForumChatScreenState extends State<ForumChatScreen> {
 
                                     return InkWell(
                                       onTap: () {
-                                        Navigator.of(context).push(
-                                            HeroDialogRoute(builder: (context) {
-                                          return ForumDoubtPopup(
-                                              doubtid: document.id,
-                                              id: widget.chatRoomId,
-                                              map: map);
-                                        }));
+                                        if (role == 'student') {
+                                          Navigator.of(context).push(
+                                              HeroDialogRoute(
+                                                  builder: (context) {
+                                            return ForumDoubtPopup(
+                                                doubtid: document.id,
+                                                id: widget.chatRoomId,
+                                                map: map);
+                                          }));
+                                        }
                                       },
                                       child: Hero(
                                           tag: 'doubt',
@@ -690,52 +729,6 @@ class TextInputForum extends StatefulWidget {
 }
 
 class _TextInputForumState extends State<TextInputForum> {
-  /*File? _image;
-  final _picker = ImagePicker();*/
-  /*void uploadImage() async {
-    final _storage = FirebaseStorage.instance;
-    final _picker = ImagePicker();
-    PickedFile image;
-
-    //Check Permissions
-    await Permission.photos.request();
-
-    var permissionStatus = await Permission.photos.status;
-
-    if (permissionStatus.isGranted) {
-      //Select Image
-      image = (await _picker.getImage(source: ImageSource.gallery))!;
-      var file = File(image.path);
-      var filename = image.path.split('/').last;
-
-      if (image != null) {
-        setState(() {
-          loader = true;
-        });
-        //Upload to Firebase
-        var snapshot = await _storage
-            .ref()
-            .child('$filename')
-            .putFile(file)
-            .whenComplete(() {
-          setState(() {
-            loader = false;
-          });
-        });
-
-        var downloadUrl = await snapshot.ref.getDownloadURL();
-
-        imageUrl = downloadUrl;
-        print(imageUrl);
-        onSendMessage();
-      } else {
-        print('No Path Received');
-      }
-    } else {
-      print('Grant Permissions and try again');
-    }
-  }*/
-
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;

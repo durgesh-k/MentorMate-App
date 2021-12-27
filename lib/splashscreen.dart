@@ -47,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
       } catch (e) {
         try {
           await FirebaseFirestore.instance
-              .collection('teachers')
+              .collection('Teachers')
               .doc(FirebaseAuth.instance.currentUser!.uid)
               .get()
               .then((value) async {

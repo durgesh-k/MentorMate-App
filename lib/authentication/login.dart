@@ -225,10 +225,11 @@ class _LoginState extends State<Login> {
                                   currentUser = value.data()!['name'];
                                   setState(() {
                                     userMap = value.data()!;
+                                    currentName = value.get('name');
                                   });
                                 })
                               : await FirebaseFirestore.instance
-                                  .collection("teachers")
+                                  .collection("Teachers")
                                   .doc(auth.currentUser!.uid)
                                   .get()
                                   .then((value) {
@@ -237,6 +238,7 @@ class _LoginState extends State<Login> {
                                   currentUser = value.data()!['name'];
                                   setState(() {
                                     teacherMap = value.data()!;
+                                    //currentName = value.get('name');
                                   });
                                 });
 

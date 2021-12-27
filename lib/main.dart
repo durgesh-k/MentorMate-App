@@ -8,7 +8,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mentor_mate/splashscreen.dart';
 import 'package:mentor_mate/welcome_and_other.dart';
 
-//import 'package:splashscreen/splashscreen.dart';
 Future<void> _messageHandler(RemoteMessage message) async {
   print('background message ${message.notification!.body}');
 }

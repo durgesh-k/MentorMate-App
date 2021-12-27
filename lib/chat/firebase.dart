@@ -36,7 +36,7 @@ void onProvideSolution(String? docId) async {
           user = value.data();
         })
       : await _firestore
-          .collection("teachers")
+          .collection("Teachers")
           .doc(auth.currentUser!.uid)
           .get()
           .then((value) {
@@ -95,7 +95,7 @@ void onSendMessage() async {
           user = value.data();
         })
       : await _firestore
-          .collection("teachers")
+          .collection("Teachers")
           .doc(auth.currentUser!.uid)
           .get()
           .then((value) {
@@ -108,7 +108,6 @@ void onSendMessage() async {
   if (message.text.isNotEmpty || messageTitle.text.isNotEmpty) {
     print(message.text);
     final DateTime now = DateTime.now();
-    print('this is user data inside doubts----------------------------------');
     print(user['name']);
     print('this is type--$type');
     if (type != 'forumDoubt') {
@@ -151,7 +150,8 @@ void onSendMessage() async {
           '${user['year']} ${user['branch']} ${user['div']} ${user['roll']}',
       'image_url': imageUrl,
       'servertimestamp': FieldValue.serverTimestamp(),
-      'searchKeywords': '{$messageTitle[0]}'
+      'searchKeywords': '{$messageTitle[0]}',
+      'uid': FirebaseAuth.instance.currentUser!.uid
     };
     message.clear();
     messageTitle.clear();
@@ -198,14 +198,11 @@ void uploadImage() async {
     //Select Image
     image = (await _picker.getImage(source: ImageSource.gallery))!;
     var file = File(image.path);
+    var imageName = image.path.split('/').last;
 
     if (image != null) {
       //Upload to Firebase
-      var snapshot = await _storage
-          .ref()
-          .child('folderName/imageName')
-          .putFile(file)
-          .whenComplete(() {});
+      var snapshot = await _storage.ref().child('$imageName').putFile(file);
 
       var downloadUrl = await snapshot.ref.getDownloadURL();
 
@@ -229,4 +226,76 @@ void addRequest(String to, String from) async {
   Map<String, dynamic> request = {'to': to, 'from': from};
   print('inside request-------------------------');
   await _firestore.collection('request').add(request);
+}
+
+void sendImage(String? chatroomId) async {
+  final _storage = FirebaseStorage.instance;
+  final _picker = ImagePicker();
+  PickedFile image;
+
+  //Check Permissions
+  await Permission.photos.request();
+
+  var permissionStatus = await Permission.photos.status;
+
+  if (permissionStatus.isGranted) {
+    //Select Image
+    image = (await _picker.getImage(source: ImageSource.gallery))!;
+    var file = File(image.path);
+    var imageName = image.path.split('/').last;
+
+    if (image != null) {
+      var snapshot = await _storage.ref().child('$imageName').putFile(file);
+
+      var downloadUrl = await snapshot.ref.getDownloadURL();
+      var user;
+      role == 'student'
+          ? await _firestore
+              .collection("Users")
+              .doc(auth.currentUser!.uid)
+              .get()
+              .then((value) {
+              print(value.data());
+              print(value.data()!['name']);
+              currentUser = value.data()!['name'];
+              user = value.data();
+            })
+          : await _firestore
+              .collection("Teachers")
+              .doc(auth.currentUser!.uid)
+              .get()
+              .then((value) {
+              print(value.data());
+              print(value.data()!['name']);
+              currentUser = value.data()!['name'];
+              user = value.data();
+            });
+      final DateTime now = DateTime.now();
+      Map<String, dynamic> messages = {
+        'id': id,
+        "sendby": user['role'].toString(),
+        'to': to,
+        'type': 'message',
+        'description': null,
+        'solved': false,
+        "message": null,
+        'title': null,
+        "time": '${now.hour} : ${now.minute}',
+        'name': user['name'].toString(),
+        'studentKey':
+            '${user['year']} ${user['branch']} ${user['div']} ${user['roll']}',
+        'image_url': downloadUrl,
+        'servertimestamp': FieldValue.serverTimestamp(),
+        'searchKeywords': '{$messageTitle[0]}',
+        'uid': FirebaseAuth.instance.currentUser!.uid
+      };
+      await _firestore
+          .collection('chatroom')
+          .doc(chatroomId)
+          .collection('chats')
+          .doc(chatroomId)
+          .collection('doubts')
+          .add(messages);
+    }
+  }
 }

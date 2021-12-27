@@ -29,6 +29,7 @@ class _RequestListState extends State<RequestList> {
             } else {
               return Expanded(
                 child: ListView.builder(
+                    shrinkWrap: true,
                     itemCount: usersnapshot.data?.docs.length,
                     itemBuilder: (BuildContext context, index) {
                       Map<String, dynamic> map = usersnapshot.data!.docs[index]
@@ -62,69 +63,65 @@ class _RequestSentCardState extends State<RequestSentCard> {
     return InkWell(
       radius: 320,
       splashColor: Colors.black.withOpacity(0.2),
-       onTap: () {       
-         
-          String roomId1 = chatRoomId(widget.map['from'], widget.map['to']);
-       
-         
-                        setState(() {
-                          type = 'link'; 
-                          roomId = roomId1;
-                        });
-                        print(message.text);
-                        message.text = "https://meet.google.com/wax-ncmq-eim";
-                        print(message.text);
-                        onSendMessage();
-                      },
+      onTap: () {
+        String roomId1 = chatRoomId(widget.map['from'], widget.map['to']);
+
+        setState(() {
+          type = 'link';
+          roomId = roomId1;
+        });
+        print(message.text);
+        message.text = "https://meet.google.com/wax-ncmq-eim";
+        print(message.text);
+        onSendMessage();
+      },
       // onTap: () {
 
       //   });
-        
-        
+
       // },
-      child:
-       Padding(
-         padding: EdgeInsets.symmetric(
-             horizontal: width * 0.03, vertical: height * 0.0045), //12 4
-         child: ClipRRect(
-           child: BackdropFilter(
-             filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-             child: Container(
-               height: height * 0.094, //80
-               width: width,
-               decoration: BoxDecoration(
-                   color: grey.withOpacity(0.4),
-                   borderRadius: BorderRadius.circular(10)),
-               child: Padding(
-                 padding: EdgeInsets.symmetric(horizontal: width * 0.045), //18
-                 child: Center(
-                   child: Row(
-                     crossAxisAlignment: CrossAxisAlignment.center,
-                     children: [
-                       Container(
-                         height: height * 0.023, //20
-                         child: SvgPicture.asset('assets/meet.svg'),
-                       ),
-                       SizedBox(
-                         width: width * 0.05, //20
-                       ),
-                       Flexible(
-                         child: Text(
-                           '${widget.map['from']} has requested for a meet',
-                           style: TextStyle(
-                               fontFamily: "MontserratM",
-                               fontSize: width * 0.04 //16
-                               ),
-                         ),
-                       ),
-                     ],
-                   ),
-                 ),
-               ),
-             ),
-           ),
-         ),
-       ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+            horizontal: width * 0.03, vertical: height * 0.0045), //12 4
+        child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            child: Container(
+              height: height * 0.094, //80
+              width: width,
+              decoration: BoxDecoration(
+                  color: grey.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(10)),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: width * 0.045), //18
+                child: Center(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        height: height * 0.023, //20
+                        child: SvgPicture.asset('assets/meet.svg'),
+                      ),
+                      SizedBox(
+                        width: width * 0.05, //20
+                      ),
+                      Flexible(
+                        child: Text(
+                          '${widget.map['from']} has requested for a meet',
+                          style: TextStyle(
+                              fontFamily: "MontserratM",
+                              fontSize: width * 0.04 //16
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

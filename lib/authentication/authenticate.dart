@@ -7,6 +7,7 @@ import 'package:mentor_mate/chat/firebase.dart';
 import 'package:mentor_mate/components/loader.dart';
 import 'package:mentor_mate/globals.dart';
 import 'package:mentor_mate/home.dart';
+import 'package:mentor_mate/welcome_and_other.dart';
 
 /*class Authenticate extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -71,7 +72,7 @@ Future logOut(BuildContext context) async {
     await _auth.signOut().then((value) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Login()),
+        MaterialPageRoute(builder: (context) => StudentorTeacher()),
       );
     });
   } catch (e) {
@@ -131,10 +132,11 @@ void addTeacher() async {
       'TY': tyControllerT.text,
       "BTech": btechControllerT.text,
       'role': role,
+      'uid': _auth.currentUser!.uid
     };
 
     await _firestore
-        .collection('teachers')
+        .collection('Teachers')
         .doc(_auth.currentUser!.uid)
         .set(teacherData);
   } else {

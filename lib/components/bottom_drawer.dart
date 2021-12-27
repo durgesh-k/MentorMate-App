@@ -230,6 +230,9 @@ class _BottomDrawerState extends State<BottomDrawer> {
                               SizedBox(height: height * 0.035), //30
                               InkWell(
                                 onTap: () {
+                                  setState(() {
+                                    type = 'doubt';
+                                  });
                                   uploadImage();
                                 },
                                 child: Container(

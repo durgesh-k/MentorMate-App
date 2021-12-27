@@ -31,9 +31,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
   //this widget is the text style for subjects
   static TextStyle _textStyle() {
     return TextStyle(
-        fontFamily: "MontserratSB",
-        fontSize: width! * 0.061, //24
-        color: Colors.black);
+        fontFamily: "MontserratSB", fontSize: 26, color: Colors.black);
   }
 
   //this widget is the subject card
@@ -107,7 +105,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
             "Welcome,",
             style: TextStyle(
               fontFamily: "MontserratB",
-              fontSize: width! * 0.112, //44
+              fontSize: 36,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -116,7 +114,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
             widget.userMap['name'],
             style: TextStyle(
               fontFamily: "MontserratT",
-              fontSize: width! * 0.076, //30
+              fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -126,7 +124,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
           ),
           StreamBuilder<QuerySnapshot>(
             stream:
-                FirebaseFirestore.instance.collection('teachers').snapshots(),
+                FirebaseFirestore.instance.collection('Teachers').snapshots(),
             builder: (ctx, AsyncSnapshot<QuerySnapshot> usersnapshot) {
               if (usersnapshot.connectionState == ConnectionState.waiting) {
                 return Container(
@@ -149,7 +147,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
                         radius: 320,
                         splashColor: Colors.black.withOpacity(0.2),
                         onTap: () {
-                          String roomId1 = chatRoomId(currentName, map['name']);
+                          print(
+                              'checkhere2--${FirebaseAuth.instance.currentUser!.uid} ${map['uid']}');
+                          String roomId1 = chatRoomId(
+                              FirebaseAuth.instance.currentUser!.uid,
+                              map['uid']);
                           setState(() {
                             roomId = roomId1;
                             to = map['name'];
@@ -284,6 +286,9 @@ class _StudentHomeState extends State<StudentHome> {
                 InkWell(
                   onTap: () {
                     logOut(context);
+                    setState(() {
+                      role = '';
+                    });
                   },
                   child: Icon(
                     PhosphorIcons.sign_out,

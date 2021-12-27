@@ -117,7 +117,7 @@ class _TeacherChatScreenState extends State<TeacherChatScreen> {
                           .collection('chats')
                           .doc(widget.chatRoomId)
                           .collection('doubts')
-                          .orderBy('servertimestamp', descending: false)
+                          .orderBy('servertimestamp', descending: true)
                           .snapshots(),
                       builder: (BuildContext context,
                           AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -162,6 +162,7 @@ class _TeacherChatScreenState extends State<TeacherChatScreen> {
                   width: width,
                   color: grey,
                   child: TextInput2(
+                    chatroomId: widget.chatRoomId,
                     id: widget.userMap!['id'],
                   )),
             ],
@@ -174,59 +175,13 @@ class _TeacherChatScreenState extends State<TeacherChatScreen> {
 
 class TextInput2 extends StatefulWidget {
   int id;
-  TextInput2({required this.id});
+  final String? chatroomId;
+  TextInput2({required this.id, this.chatroomId});
   @override
   _TextInput2State createState() => _TextInput2State();
 }
 
 class _TextInput2State extends State<TextInput2> {
-  File? _image;
-  final _picker = ImagePicker();
-
-  void uploadImage() async {
-    final _storage = FirebaseStorage.instance;
-    final _picker = ImagePicker();
-    PickedFile image;
-
-    //Check Permissions
-    await Permission.photos.request();
-
-    var permissionStatus = await Permission.photos.status;
-
-    if (permissionStatus.isGranted) {
-      //Select Image
-      image = (await _picker.getImage(source: ImageSource.gallery))!;
-      var file = File(image.path);
-      var filename = image.path.split('/').last;
-
-      if (image != null) {
-        setState(() {
-          loader = true;
-        });
-        //Upload to Firebase
-        var snapshot = await _storage
-            .ref()
-            .child('$filename')
-            .putFile(file)
-            .whenComplete(() {
-          setState(() {
-            loader = false;
-          });
-        });
-
-        var downloadUrl = await snapshot.ref.getDownloadURL();
-
-        imageUrl = downloadUrl;
-        print(imageUrl);
-        onSendMessage();
-      } else {
-        print('No Path Received');
-      }
-    } else {
-      print('Grant Permissions and try again');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -248,8 +203,9 @@ class _TextInput2State extends State<TextInput2> {
             children: [
               InkWell(
                 onTap: () {
-                  uploadImage();
+                  //uploadImage();
                   //onSendMessage();
+                  sendImage(widget.chatroomId);
                 },
                 child: Container(
                   height: height * 0.028, //24
