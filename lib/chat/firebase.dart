@@ -12,6 +12,8 @@ final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 final FirebaseAuth auth = FirebaseAuth.instance;
 Map<String, dynamic>? userMap;
 
+String docIdforRequests = '';
+
 String chatRoomId(String user1, String user2) {
   if (user1.toLowerCase().codeUnits[0] > user2.toLowerCase().codeUnits[0]) {
     return "$user1$user2";
@@ -140,6 +142,7 @@ void onSendMessage() async {
       "sendby": user['role'].toString(),
       'to': to,
       'type': type,
+      'meet_at': selectedTime.toString(),
       'description': messageDescription.text,
       'solved': false,
       "message": message.text,
@@ -168,7 +171,8 @@ void onSendMessage() async {
         .collection('chats')
         .doc(roomId)
         .collection('doubts')
-        .add(messages);
+        .add(messages)
+        .then((value) => docIdforRequests = value.id);
 
     type = null;
   } else {
@@ -222,10 +226,17 @@ void uploadImage() async {
   }
 }
 
-void addRequest(String to, String from) async {
-  Map<String, dynamic> request = {'to': to, 'from': from};
+void addRequest(String to, String from, String fromUid, String toUid) async {
+  String roomIdreq = chatRoomId(fromUid, toUid);
+  Map<String, dynamic> request = {
+    'to': to,
+    'from': from,
+    'to_uid': toUid,
+    'from_uid': fromUid,
+    'doc_id': docIdforRequests,
+  };
   print('inside request-------------------------');
-  await _firestore.collection('request').add(request);
+  await _firestore.collection('request').doc(roomIdreq).set(request);
 }
 
 void sendImage(String? chatroomId) async {

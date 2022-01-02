@@ -22,10 +22,14 @@ class ChatScreen extends StatefulWidget {
   String? chatRoomId;
   String name1;
   String name2;
+  String uid1;
+  String uid2;
 
   ChatScreen(
       {this.chatRoomId,
       this.userMap,
+      required this.uid1,
+      required this.uid2,
       required this.name1,
       required this.name2});
   @override
@@ -97,7 +101,10 @@ class _ChatScreenState extends State<ChatScreen> {
                         Navigator.of(context)
                             .push(HeroDialogRoute(builder: (context) {
                           return MeetRequestPopupCard(
-                              to: widget.name2, from: widget.name1);
+                              toUid: widget.uid2,
+                              fromUid: widget.uid1,
+                              to: widget.name2,
+                              from: widget.name1);
                         }));
                       },
                       child: Hero(
@@ -161,7 +168,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                     snapshot.data!.docs[index].data()
                                         as Map<String, dynamic>;
                                 if (map['type'] == 'link') {
-                                  return MeetCard();
+                                  return MeetCard(
+                                    time: map['meet_at'],
+                                  );
                                 } else {
                                   return map['type'] == 'message'
                                       ? Message(
@@ -512,7 +521,8 @@ class _TextInputState extends State<TextInput> {
 }
 
 class MeetCard extends StatefulWidget {
-  const MeetCard({Key? key}) : super(key: key);
+  final String? time;
+  const MeetCard({this.time});
 
   @override
   _MeetCardState createState() => _MeetCardState();
@@ -547,7 +557,7 @@ class _MeetCardState extends State<MeetCard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Click to join this link',
+                  Text('Click to join this link at ${widget.time}',
                       style: TextStyle(
                           fontFamily: "MontserratM",
                           fontSize: 12, //18

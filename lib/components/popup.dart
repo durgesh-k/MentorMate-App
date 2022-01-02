@@ -61,7 +61,13 @@ const String _heroAddTodo = 'add-todo-hero';
 class MeetRequestPopupCard extends StatefulWidget {
   String from;
   String to;
-  MeetRequestPopupCard({required this.from, required this.to});
+  String toUid;
+  String fromUid;
+  MeetRequestPopupCard(
+      {required this.from,
+      required this.to,
+      required this.toUid,
+      required this.fromUid});
   @override
   _MeetRequestPopupCardState createState() => _MeetRequestPopupCardState();
 }
@@ -127,7 +133,8 @@ class _MeetRequestPopupCardState extends State<MeetRequestPopupCard> {
                         print('-------------------------');
                         print(widget.from);
                         print('-------------------------');
-                        addRequest(widget.to, widget.from);
+                        addRequest(widget.to, widget.from, widget.fromUid,
+                            widget.toUid);
                         Navigator.pop(context);
                       },
                       child: const Text(

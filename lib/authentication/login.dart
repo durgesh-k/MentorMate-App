@@ -238,7 +238,7 @@ class _LoginState extends State<Login> {
                                   currentUser = value.data()!['name'];
                                   setState(() {
                                     teacherMap = value.data()!;
-                                    //currentName = value.get('name');
+                                    currentName = value.get('name');
                                   });
                                 });
 

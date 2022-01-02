@@ -15,6 +15,7 @@ import 'package:mentor_mate/doubts_list.dart';
 import 'package:mentor_mate/forum.dart';
 import 'package:mentor_mate/globals.dart';
 import 'package:mentor_mate/models/models.dart';
+import 'package:mentor_mate/noticeboard/noticeBoard.dart';
 import 'package:mentor_mate/quiz/quiz.dart';
 import 'package:titled_navigation_bar/titled_navigation_bar.dart';
 
@@ -172,6 +173,8 @@ class _StudentHomePageState extends State<StudentHomePage> {
                               builder: (_) => ChatScreen(
                                   chatRoomId: roomId1,
                                   userMap: map,
+                                  uid1: FirebaseAuth.instance.currentUser!.uid,
+                                  uid2: map['uid'],
                                   name1: currentName,
                                   name2: map['name'])));
                         },
@@ -510,17 +513,6 @@ class _TeacherHomePageState extends State<TeacherHomePage>
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(120), //70
             child: AppBar(
-              actions: [
-                InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) =>
-                                  FormDart(teacherMap: widget.teacherMap)));
-                    },
-                    child: Text("forum"))
-              ],
               automaticallyImplyLeading: false,
               backgroundColor: Colors.white,
               elevation: 0,
@@ -551,18 +543,34 @@ class _TeacherHomePageState extends State<TeacherHomePage>
                               },
                             ),
                           ),
-                          IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (_) => RequestList(
-                                            teacherMap: widget.teacherMap)));
-                              },
-                              icon: Icon(
-                                Iconsax.notification_1,
-                                size: 20,
-                              ))
+                          Row(
+                            children: [
+                              IconButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) => NoticeBoard()));
+                                  },
+                                  icon: Icon(
+                                    Iconsax.note_14,
+                                    size: 20,
+                                  )),
+                              IconButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) => RequestList(
+                                                teacherMap:
+                                                    widget.teacherMap)));
+                                  },
+                                  icon: Icon(
+                                    Iconsax.notification_1,
+                                    size: 20,
+                                  )),
+                            ],
+                          )
                         ],
                       ),
                     ),

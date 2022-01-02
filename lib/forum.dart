@@ -7,6 +7,7 @@ import 'package:mentor_mate/chat/firebase.dart';
 import 'package:mentor_mate/chat_screen.dart';
 import 'package:mentor_mate/components/bottom_drawer.dart';
 import 'package:mentor_mate/components/doubt_card.dart';
+import 'package:mentor_mate/components/imageLarge.dart';
 import 'package:mentor_mate/components/popup.dart';
 import 'package:mentor_mate/globals.dart';
 import 'package:mentor_mate/search.dart';
@@ -97,7 +98,7 @@ class _FormDartState extends State<FormDart> {
                             fillColor: Colors.white,
                             contentPadding: EdgeInsets.symmetric(vertical: 18),
                             enabledBorder: InputBorder.none,
-                            hintText: 'Please type what you want ro search',
+                            hintText: 'Please type what you want to search',
                             hintStyle: TextStyle(
                                 fontFamily: "MontserratM",
                                 fontSize: 16,
@@ -128,6 +129,7 @@ class _FormDartState extends State<FormDart> {
                 } else {
                   return Expanded(
                     child: ListView.builder(
+                        physics: BouncingScrollPhysics(),
                         itemCount: usersnapshot.data?.docs.length,
                         itemBuilder: (BuildContext context, index) {
                           data = usersnapshot.data!.docs[index].data();
@@ -585,20 +587,20 @@ class _ForumChatScreenState extends State<ForumChatScreen> {
                           return Container();
                         }
                       })),
+              Positioned(
+                bottom: 0,
+                child: role == 'teacher'
+                    ? Container(
+                        height: 80,
+                        width: width,
+                        color: grey,
+                        child: TextInputForum(docId: widget.chatRoomId),
+                      )
+                    : Container(),
+              )
               //Container(width: width, child: TextInput()),
             ],
           ),
-          Positioned(
-            bottom: 0,
-            child: role == 'teacher'
-                ? Container(
-                    height: 80,
-                    width: width,
-                    color: grey,
-                    child: TextInputForum(docId: widget.chatRoomId),
-                  )
-                : Container(),
-          )
         ],
       ),
     );
@@ -673,7 +675,38 @@ class _ForumMessageState extends State<ForumMessage> {
               ],
             ),
             (widget.map!['image_url'] != null)
-                ? Image.network(widget.map!['image_url']!)
+                ? InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => ImageLarge(
+                                imageurl: widget.map!['image_url'],
+                              )));
+                    },
+                    child: Container(
+                        decoration: BoxDecoration(
+                            color: grey,
+                            borderRadius: BorderRadius.circular(10)),
+                        width: 200,
+                        height: 200,
+                        child: Center(
+                            child: loader == true
+                                ? CircularProgressIndicator()
+                                : Container(
+                                    decoration: BoxDecoration(
+                                        color: grey,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    width: 190,
+                                    height: 190,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        widget.map!['image_url'],
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ))),
+                  )
                 : Container(
                     height: 0,
                   ),
@@ -721,7 +754,7 @@ class _TextInputForumState extends State<TextInputForum> {
     return Container(
       height: 80, //50
       width: width,
-      decoration: BoxDecoration(color: Colors.transparent),
+      decoration: BoxDecoration(color: Colors.grey.shade100),
       child: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: width * 0.03, vertical: height * 0.014), //12 12

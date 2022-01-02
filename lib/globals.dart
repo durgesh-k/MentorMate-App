@@ -53,3 +53,5 @@ TextEditingController seqControllerT = TextEditingController();
 
 String? currentUser;
 String? currentYear;
+
+TimeOfDay selectedTime = TimeOfDay.now();

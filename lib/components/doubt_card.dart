@@ -156,7 +156,7 @@ class _DoubtsState extends State<Doubts> {
                     to = widget.map['name'];
                     print(roomId2);
                     print(
-                        "This is ....................................................................................");
+                        "This is .....................mappp...............................................................${widget.map}");
                   });
 
                   Navigator.of(context).push(MaterialPageRoute(

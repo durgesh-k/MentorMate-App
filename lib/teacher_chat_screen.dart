@@ -66,13 +66,13 @@ class _TeacherChatScreenState extends State<TeacherChatScreen> {
                     color: Colors.black),
               ),
               SizedBox(height: 5),
-              Text(
+              /*Text(
                 widget.userMap!['studentKey'],
                 style: TextStyle(
                     fontFamily: "MontserratM",
                     fontSize: 12,
                     color: Colors.black.withOpacity(0.4)),
-              ),
+              ),*/
             ],
           ),
           actions: [
