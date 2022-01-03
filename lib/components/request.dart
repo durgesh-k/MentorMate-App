@@ -127,6 +127,7 @@ class _RequestSentCardState extends State<RequestSentCard> {
         message.text = "https://meet.google.com/wax-ncmq-eim";
         print(message.text);
         onSendMessage();
+        deleteRequest(widget.docId);
         Fluttertoast.showToast(
             msg: 'Meet accepted',
             toastLength: Toast.LENGTH_SHORT,

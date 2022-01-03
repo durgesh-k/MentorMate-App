@@ -142,7 +142,9 @@ class _TeacherChatScreenState extends State<TeacherChatScreen> {
                                     });
                                   }*/
                                 if (map['type'] == 'link') {
-                                  return MeetCard();
+                                  return MeetCard(
+                                    time: map['meet_at'],
+                                  );
                                 } else {
                                   return map['type'] == 'message'
                                       ? Message(

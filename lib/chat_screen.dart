@@ -557,7 +557,8 @@ class _MeetCardState extends State<MeetCard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Click to join this link at ${widget.time}',
+                  Text(
+                      'Join this link at ${widget.time.toString().substring(10, 15)}',
                       style: TextStyle(
                           fontFamily: "MontserratM",
                           fontSize: 12, //18

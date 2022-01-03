@@ -1,8 +1,13 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mentor_mate/chat/firebase.dart';
 import 'package:mentor_mate/globals.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class BottomDrawer extends StatefulWidget {
   bool? showMenu;
@@ -24,6 +29,52 @@ class _BottomDrawerState extends State<BottomDrawer> {
     flutterLocalNotifications = new FlutterLocalNotificationsPlugin();
     flutterLocalNotifications!.initialize(initilizationSettings,
         onSelectNotification: notificationSelected);*/
+  }
+
+  bool imageloader = false;
+
+  void uploadDoubtImage() async {
+    final _storage = FirebaseStorage.instance;
+    final _picker = ImagePicker();
+    PickedFile image;
+
+    //Check Permissions
+    await Permission.photos.request();
+
+    var permissionStatus = await Permission.photos.status;
+
+    if (permissionStatus.isGranted) {
+      //Select Image
+      image = (await _picker.getImage(source: ImageSource.gallery))!;
+      var file = File(image.path);
+      var imageName = image.path.split('/').last;
+
+      if (image != null) {
+        //Upload to Firebase
+        setState(() {
+          imageloader = true;
+        });
+        var snapshot = await _storage.ref().child('$imageName').putFile(file);
+
+        var downloadUrl = await snapshot.ref.getDownloadURL();
+
+        imageUrl = downloadUrl;
+        print(imageUrl);
+        setState(() {
+          imageloader = false;
+        });
+
+        if (type == 'forumDoubt') {
+          onProvideSolution(docId);
+        } else {
+          onSendMessage();
+        }
+      } else {
+        print('No Path Received');
+      }
+    } else {
+      print('Grant Permissions and try again');
+    }
   }
 
   double doubtOpacity = 0;
@@ -267,8 +318,6 @@ class _BottomDrawerState extends State<BottomDrawer> {
                               SizedBox(height: height * 0.035), //30
                               InkWell(
                                 onTap: () {
-                                  print(
-                                      'inside ask---------------------------');
                                   Drawerclass.showMenu = false;
                                   widget.showMenu = false;
                                   _showNotification();
