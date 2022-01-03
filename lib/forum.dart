@@ -57,7 +57,8 @@ class _FormDartState extends State<FormDart> {
           padding: const EdgeInsets.all(10.0),
           child: Text(
             'Forum',
-            style: TextStyle(fontFamily: "MontserratB", color: Colors.black),
+            style: TextStyle(
+                fontFamily: "MontserratB", fontSize: 36, color: Colors.black),
           ),
         ),
         elevation: 0,

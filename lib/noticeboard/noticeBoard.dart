@@ -2,7 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:mentor_mate/authentication/authenticate.dart';
+import 'package:mentor_mate/components/imageLarge.dart';
 import 'package:mentor_mate/globals.dart';
+import 'package:mentor_mate/noticeboard/noticeArchive.dart';
 import 'package:mentor_mate/noticeboard/postNotice.dart';
 
 String noticeYear = '';
@@ -10,6 +13,12 @@ String noticeBranch = '';
 TextEditingController? noticeTitle = TextEditingController();
 TextEditingController? noticeDescription = TextEditingController();
 DateTime selectedDate = DateTime.now();
+String? noticeImage;
+int daysBetween(DateTime from, DateTime to) {
+  from = DateTime(from.year, from.month, from.day);
+  to = DateTime(to.year, to.month, to.day);
+  return (to.difference(from).inHours / 24).round();
+}
 
 void onAddNotice() async {
   try {
@@ -18,11 +27,17 @@ void onAddNotice() async {
       'branch': noticeBranch,
       'title': noticeTitle!.text,
       'description': noticeDescription!.text,
+      'servertimestamp': FieldValue.serverTimestamp(),
+      'difference': daysBetween(DateTime.now(),
+          DateTime(selectedDate.year, selectedDate.month, selectedDate.day)),
+      'imageUrl': noticeImage,
       'deadline': [selectedDate.day, selectedDate.month, selectedDate.year]
     };
     await FirebaseFirestore.instance.collection('Notice').add(notice);
     noticeTitle!.clear();
     noticeDescription!.clear();
+    selectedDate = DateTime.now();
+    noticeImage = null;
     Fluttertoast.showToast(
         msg: 'Notice posted',
         toastLength: Toast.LENGTH_SHORT,
@@ -44,7 +59,8 @@ void onAddNotice() async {
 }
 
 class NoticeBoard extends StatefulWidget {
-  const NoticeBoard({Key? key}) : super(key: key);
+  final Map<String, dynamic> userMap;
+  const NoticeBoard({required this.userMap});
 
   @override
   _NoticeBoardState createState() => _NoticeBoardState();
@@ -54,7 +70,10 @@ class _NoticeBoardState extends State<NoticeBoard> {
   bool chose = false;
   String chosenYear = 'Year';
   String chosenBranch = 'Branch';
-  var stream = FirebaseFirestore.instance.collection('Notice').snapshots();
+  var stream = FirebaseFirestore.instance
+      .collection('Notice')
+      .orderBy('difference')
+      .snapshots();
 
   void fetchNotice(bool chose, String chosenYear, String chosenBranch) {
     if (chose) {
@@ -63,6 +82,7 @@ class _NoticeBoardState extends State<NoticeBoard> {
           stream = FirebaseFirestore.instance
               .collection('Notice')
               .where('year', isEqualTo: chosenYear)
+              .orderBy('difference')
               .snapshots();
         });
       } else if (chosenYear == 'Year' && chosenBranch != 'Branch') {
@@ -70,6 +90,7 @@ class _NoticeBoardState extends State<NoticeBoard> {
           stream = FirebaseFirestore.instance
               .collection('Notice')
               .where('branch', isEqualTo: chosenBranch)
+              .orderBy('difference')
               .snapshots();
         });
       } else if (chosenYear != 'Year' && chosenBranch != 'Branch') {
@@ -78,16 +99,23 @@ class _NoticeBoardState extends State<NoticeBoard> {
               .collection('Notice')
               .where('year', isEqualTo: chosenYear)
               .where('branch', isEqualTo: chosenBranch)
+              .orderBy('difference')
               .snapshots();
         });
       } else {
         setState(() {
-          stream = FirebaseFirestore.instance.collection('Notice').snapshots();
+          stream = FirebaseFirestore.instance
+              .collection('Notice')
+              .orderBy('difference')
+              .snapshots();
         });
       }
     } else {
       setState(() {
-        stream = FirebaseFirestore.instance.collection('Notice').snapshots();
+        stream = FirebaseFirestore.instance
+            .collection('Notice')
+            .orderBy('difference')
+            .snapshots();
       });
     }
   }
@@ -122,6 +150,25 @@ class _NoticeBoardState extends State<NoticeBoard> {
               Iconsax.arrow_left4,
               color: Colors.black,
             )),
+        actions: [
+          role == 'student'
+              ? Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    NoticeArchive(userMap: widget.userMap)));
+                      },
+                      icon: Icon(
+                        Iconsax.folder_minus,
+                        color: Colors.black,
+                      )),
+                )
+              : Container()
+        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -147,41 +194,53 @@ class _NoticeBoardState extends State<NoticeBoard> {
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(width: 1, color: Colors.black)),
                         child: Center(
-                          child: DropdownButton<String>(
-                            hint: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Text(
-                                chosenYear,
-                                style: TextStyle(
-                                  fontFamily: 'Montserrat',
+                          child: role == 'teacher'
+                              ? DropdownButton<String>(
+                                  hint: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    child: Text(
+                                      chosenYear,
+                                      style: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                      ),
+                                    ),
+                                  ),
+                                  items: <String>['FY', 'SY', 'TY', 'BTech']
+                                      .map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  icon: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 4.0),
+                                    child: Icon(
+                                      Iconsax.arrow_down_1,
+                                      size: 12,
+                                    ),
+                                  ),
+                                  underline: SizedBox(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      chose = true;
+                                      chosenYear = value!;
+                                    });
+                                    fetchNotice(
+                                        chose, chosenYear, chosenBranch);
+                                  },
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  child: Text(
+                                    widget.userMap['year'],
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            items: <String>['FY', 'SY', 'TY', 'BTech']
-                                .map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            icon: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: Icon(
-                                Iconsax.arrow_down_1,
-                                size: 12,
-                              ),
-                            ),
-                            underline: SizedBox(),
-                            onChanged: (value) {
-                              setState(() {
-                                chose = true;
-                                chosenYear = value!;
-                              });
-                              fetchNotice(chose, chosenYear, chosenBranch);
-                            },
-                          ),
                         ),
                       ),
                       SizedBox(
@@ -193,41 +252,53 @@ class _NoticeBoardState extends State<NoticeBoard> {
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(width: 1, color: Colors.black)),
                         child: Center(
-                          child: DropdownButton<String>(
-                            hint: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Text(
-                                chosenBranch,
-                                style: TextStyle(
-                                  fontFamily: 'Montserrat',
+                          child: role == 'teacher'
+                              ? DropdownButton<String>(
+                                  hint: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    child: Text(
+                                      chosenBranch,
+                                      style: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                      ),
+                                    ),
+                                  ),
+                                  items: <String>['CSE', 'IT', 'ENTC', 'MECH']
+                                      .map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  icon: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 4.0),
+                                    child: Icon(
+                                      Iconsax.arrow_down_1,
+                                      size: 12,
+                                    ),
+                                  ),
+                                  underline: SizedBox(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      chose = true;
+                                      chosenBranch = value!;
+                                    });
+                                    fetchNotice(
+                                        chose, chosenYear, chosenBranch);
+                                  },
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  child: Text(
+                                    widget.userMap['branch'],
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            items: <String>['CSE', 'IT', 'ENTC', 'MECH']
-                                .map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            icon: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: Icon(
-                                Iconsax.arrow_down_1,
-                                size: 12,
-                              ),
-                            ),
-                            underline: SizedBox(),
-                            onChanged: (value) {
-                              setState(() {
-                                chose = true;
-                                chosenBranch = value!;
-                              });
-                              fetchNotice(chose, chosenYear, chosenBranch);
-                            },
-                          ),
                         ),
                       )
                     ],
@@ -255,9 +326,19 @@ class _NoticeBoardState extends State<NoticeBoard> {
                             var date1 = DateTime.now();
                             var date2 = DateTime(map['deadline'][2],
                                 map['deadline'][1], map['deadline'][0]);
-                            return daysBetween(date1, date2) >= 0
-                                ? NoticsCard(map: map)
-                                : Container();
+                            if (role == 'student') {
+                              return daysBetween(date1, date2) >= 0
+                                  ? map['year'] == widget.userMap['year'] &&
+                                          map['branch'] ==
+                                              widget.userMap['branch']
+                                      ? NoticsCard(map: map)
+                                      : Container()
+                                  : Container();
+                            } else {
+                              return daysBetween(date1, date2) >= 0
+                                  ? NoticsCard(map: map)
+                                  : Container();
+                            }
                           }),
                     );
                   }
@@ -353,65 +434,95 @@ class _NoticsCardState extends State<NoticsCard> {
               SizedBox(
                 height: 6,
               ),
-              Container(
-                  width: width,
-                  child: Text(
-                    '- ${widget.map['title']}',
-                    style: TextStyle(
-                        fontFamily: "MontserratSB",
-                        fontSize: 24,
-                        color: diff < 0
-                            ? Colors.black.withOpacity(0.2)
-                            : Colors.black),
-                  )),
+              widget.map['title'] != null
+                  ? Container(
+                      width: width,
+                      child: Text(
+                        '- ${widget.map['title']}',
+                        style: TextStyle(
+                            fontFamily: "MontserratSB",
+                            fontSize: 24,
+                            color: diff < 0
+                                ? Colors.black.withOpacity(0.2)
+                                : Colors.black),
+                      ))
+                  : Container(),
               SizedBox(
                 height: 10,
               ),
-              Container(
-                width: width,
-                child: Row(
-                  children: [
-                    Text(
-                      daysBetween(
-                              DateTime.now(),
-                              DateTime(
-                                  widget.map['deadline'][2],
-                                  widget.map['deadline'][1],
-                                  widget.map['deadline'][0]))
-                          .toString(),
-                      style: TextStyle(
-                          fontFamily: "MontserratSB",
-                          fontSize: 14,
-                          color: diff < 0
-                              ? Colors.black.withOpacity(0.2)
-                              : Colors.black),
-                    ),
-                    Text(
-                      ' days to deadline',
-                      style: TextStyle(
-                          fontFamily: "Montserrat",
-                          fontSize: 14,
-                          color: diff < 0
-                              ? Colors.black.withOpacity(0.2)
-                              : Colors.black),
+              widget.map['deadline'] != null
+                  ? Container(
+                      width: width,
+                      child: Row(
+                        children: [
+                          Text(
+                            daysBetween(
+                                    DateTime.now(),
+                                    DateTime(
+                                        widget.map['deadline'][2],
+                                        widget.map['deadline'][1],
+                                        widget.map['deadline'][0]))
+                                .toString(),
+                            style: TextStyle(
+                                fontFamily: "MontserratSB",
+                                fontSize: 14,
+                                color: diff < 0
+                                    ? Colors.black.withOpacity(0.2)
+                                    : Colors.black),
+                          ),
+                          Text(
+                            ' days to deadline',
+                            style: TextStyle(
+                                fontFamily: "Montserrat",
+                                fontSize: 14,
+                                color: diff < 0
+                                    ? Colors.black.withOpacity(0.2)
+                                    : Colors.black),
+                          )
+                        ],
+                      ),
                     )
-                  ],
-                ),
-              ),
+                  : Container(),
               SizedBox(
                 height: 7,
               ),
-              Container(
-                  width: width,
-                  child: Text(
-                    widget.map['description'],
-                    style: TextStyle(
-                        fontFamily: "Montserrat",
-                        fontSize: 20,
-                        color: diff < 0
-                            ? Colors.black.withOpacity(0.2)
-                            : Colors.black),
-                  )),
+              widget.map['description'] != null
+                  ? Container(
+                      width: width,
+                      child: Text(
+                        widget.map['description'],
+                        style: TextStyle(
+                            fontFamily: "Montserrat",
+                            fontSize: 20,
+                            color: diff < 0
+                                ? Colors.black.withOpacity(0.2)
+                                : Colors.black),
+                      ))
+                  : Container(),
+              SizedBox(
+                height: 10,
+              ),
+              widget.map['imageUrl'] != null
+                  ? InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                ImageLarge(imageurl: widget.map['imageUrl'])));
+                      },
+                      child: Hero(
+                        tag: widget.map['imageUrl'],
+                        child: Container(
+                          width: width,
+                          height: 400,
+                          color: grey,
+                          child: Image.network(
+                            widget.map['imageUrl'],
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Container()
             ],
           ),
         ),

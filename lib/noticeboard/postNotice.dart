@@ -1,7 +1,12 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mentor_mate/globals.dart';
 import 'package:mentor_mate/noticeboard/noticeBoard.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ClassChoice extends StatefulWidget {
   const ClassChoice({Key? key}) : super(key: key);
@@ -292,11 +297,15 @@ class _NewNoticeState extends State<NewNotice> {
     if (picked != null && picked != selectedDate)
       setState(() {
         selectedDate = picked;
+        dateOpacity = 1;
       });
   }
 
   double doubtOpacity = 0;
   double doubtdesOpacity = 0;
+  double dateOpacity = 0;
+  double imageOpacity = 0;
+  bool loader = false;
   static AnimatedOpacity _label(double value, String text) {
     return AnimatedOpacity(
       duration: Duration(milliseconds: 120),
@@ -334,6 +343,50 @@ class _NewNoticeState extends State<NewNotice> {
         fontFamily: "Montserrat",
         fontSize: width! * 0.045, //18
         color: Colors.black.withOpacity(0.6));
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    noticeTitle!.clear();
+    noticeDescription!.clear();
+  }
+
+  void uploadNoticeImage() async {
+    final _storage = FirebaseStorage.instance;
+    final _picker = ImagePicker();
+    PickedFile image;
+
+    //Check Permissions
+    await Permission.photos.request();
+
+    var permissionStatus = await Permission.photos.status;
+
+    if (permissionStatus.isGranted) {
+      //Select Image
+      image = (await _picker.getImage(source: ImageSource.gallery))!;
+      var file = File(image.path);
+      var imageName = image.path.split('/').last;
+
+      if (image != null) {
+        setState(() {
+          loader = true;
+        });
+        //Upload to Firebase
+        var snapshot = await _storage.ref().child('$imageName').putFile(file);
+        var downloadUrl = await snapshot.ref.getDownloadURL();
+
+        setState(() {
+          noticeImage = downloadUrl;
+          loader = false;
+        });
+      } else {
+        print('No Path Received');
+      }
+    } else {
+      print('Grant Permissions and try again');
+    }
   }
 
   @override
@@ -409,38 +462,89 @@ class _NewNoticeState extends State<NewNotice> {
                 },
               ),
               SizedBox(
+                height: 50,
+              ),
+              _label(dateOpacity, "Deadline"),
+              SizedBox(
                 height: 20,
               ),
               InkWell(
                 onTap: () async {
                   await _selectDate(context);
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.black, width: 1)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: Row(
-                        children: [
-                          Icon(Iconsax.calendar),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          Text(
-                            'Set Deadline',
-                            style: TextStyle(
-                                fontFamily: 'MontserratSB',
-                                fontSize: 16,
-                                color: Colors.black),
-                          )
-                        ],
-                      ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Iconsax.calendar,
+                      size: 16,
+                      color: Colors.black.withOpacity(0.3),
                     ),
-                  ),
+                    SizedBox(
+                      width: 8,
+                    ),
+                    Text(
+                      dateOpacity == 1
+                          ? '${selectedDate.day}-${selectedDate.month}-${selectedDate.year}'
+                          : 'Set Deadline',
+                      style: _hintText(),
+                    )
+                  ],
                 ),
-              )
+              ),
+              SizedBox(
+                height: 30,
+              ),
+              _label(
+                  imageOpacity, noticeImage == null ? "Image" : "Change Image"),
+              SizedBox(
+                height: 20,
+              ),
+              InkWell(
+                onTap: () async {
+                  uploadNoticeImage();
+                },
+                child: Row(
+                  children: [
+                    Icon(
+                      Iconsax.gallery,
+                      size: 16,
+                      color: Colors.black.withOpacity(0.3),
+                    ),
+                    SizedBox(
+                      width: 8,
+                    ),
+                    Text(
+                      'Image',
+                      style: _hintText(),
+                    ),
+                    SizedBox(
+                      width: 8,
+                    ),
+                    loader
+                        ? Container(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ))
+                        : Container(),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              noticeImage != null
+                  ? Container(
+                      height: 200,
+                      width: 200,
+                      color: grey,
+                      child: Image.network(
+                        noticeImage!,
+                        fit: BoxFit.contain,
+                      ),
+                    )
+                  : Container()
             ]),
           ),
           Positioned(

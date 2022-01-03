@@ -414,6 +414,22 @@ class _StudentHomeState extends State<StudentHome> {
               },
             ),
           ),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => NoticeBoard(
+                                userMap: widget.userMap,
+                              )));
+                },
+                icon: Icon(
+                  Iconsax.note_14,
+                  size: 24,
+                  color: Colors.black,
+                )),
+          ],
         ),
         body: PageView(
             controller: _pageController,
@@ -455,7 +471,10 @@ class _StudentHomeState extends State<StudentHome> {
                       color: Colors.black,
                     ),
                   ),
-                  icon: Icon(PhosphorIcons.house_bold)),
+                  icon: Icon(
+                    Iconsax.home4,
+                    color: Colors.black,
+                  )),
               TitledNavigationBarItem(
                   title: Text(
                     'Forums',
@@ -466,7 +485,10 @@ class _StudentHomeState extends State<StudentHome> {
                       color: Colors.black,
                     ),
                   ),
-                  icon: Icon(PhosphorIcons.chats_bold)),
+                  icon: Icon(
+                    Iconsax.messages,
+                    color: Colors.black,
+                  )),
               TitledNavigationBarItem(
                 title: Text(
                   'Quiz',
@@ -477,7 +499,7 @@ class _StudentHomeState extends State<StudentHome> {
                     color: Colors.black,
                   ),
                 ),
-                icon: Icon(PhosphorIcons.clipboard_text_bold),
+                icon: Icon(Iconsax.clipboard_text),
               )
             ]),
       ),
@@ -550,7 +572,9 @@ class _TeacherHomePageState extends State<TeacherHomePage>
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (_) => NoticeBoard()));
+                                            builder: (_) => NoticeBoard(
+                                                  userMap: widget.teacherMap,
+                                                )));
                                   },
                                   icon: Icon(
                                     Iconsax.note_14,
@@ -821,7 +845,10 @@ class _TeacherHomeState extends State<TeacherHome>
                       color: Colors.black,
                     ),
                   ),
-                  icon: Icon(PhosphorIcons.house_bold)),
+                  icon: Icon(
+                    Iconsax.home4,
+                    color: Colors.black,
+                  )),
               TitledNavigationBarItem(
                   title: Text(
                     'Forums',
@@ -832,7 +859,10 @@ class _TeacherHomeState extends State<TeacherHome>
                       color: Colors.black,
                     ),
                   ),
-                  icon: Icon(PhosphorIcons.chats_bold)),
+                  icon: Icon(
+                    Iconsax.messages,
+                    color: Colors.black,
+                  )),
             ]),
 
         // floatingActionButton: Padding(
