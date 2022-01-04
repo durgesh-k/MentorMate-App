@@ -638,18 +638,10 @@ class _TeacherHomePageState extends State<TeacherHomePage>
           body: TabBarView(
             controller: _controller,
             children: [
-              Expanded(
-                  child: DoubtPage(
-                      checkYear: "FY", teacherMap: widget.teacherMap)),
-              Expanded(
-                  child: DoubtPage(
-                      checkYear: "SY", teacherMap: widget.teacherMap)),
-              Expanded(
-                  child: DoubtPage(
-                      checkYear: "TY", teacherMap: widget.teacherMap)),
-              Expanded(
-                  child: DoubtPage(
-                      checkYear: "BTech", teacherMap: widget.teacherMap)),
+              DoubtPage(checkYear: "FY", teacherMap: widget.teacherMap),
+              DoubtPage(checkYear: "SY", teacherMap: widget.teacherMap),
+              DoubtPage(checkYear: "TY", teacherMap: widget.teacherMap),
+              DoubtPage(checkYear: "BTech", teacherMap: widget.teacherMap),
             ],
           )),
     );
