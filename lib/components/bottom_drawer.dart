@@ -64,11 +64,11 @@ class _BottomDrawerState extends State<BottomDrawer> {
           imageloader = false;
         });
 
-        if (type == 'forumDoubt') {
+        /*if (type == 'forumDoubt') {
           onProvideSolution(docId);
         } else {
           onSendMessage();
-        }
+        }*/
       } else {
         print('No Path Received');
       }
@@ -279,42 +279,131 @@ class _BottomDrawerState extends State<BottomDrawer> {
                                 },
                               ),
                               SizedBox(height: height * 0.035), //30
-                              InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    type = 'doubt';
-                                  });
-                                  uploadImage();
-                                },
-                                child: Container(
-                                    width: width,
-                                    decoration: BoxDecoration(
-                                        color: grey,
-                                        borderRadius: BorderRadius.circular(6)),
-                                    child: Center(
-                                        child: Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: width * 0.03,
-                                          vertical: height * 0.014), //12 12
+                              Text(
+                                'Attachments',
+                                style: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontSize: 12,
+                                    color: Colors.black),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              imageUrl == null
+                                  ? InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          type = 'doubt';
+                                        });
+                                        uploadDoubtImage();
+                                      },
+                                      child: Container(
+                                          width: width,
+                                          decoration: BoxDecoration(
+                                              color: grey,
+                                              borderRadius:
+                                                  BorderRadius.circular(6)),
+                                          child: Center(
+                                              child: Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: width * 0.03,
+                                                vertical:
+                                                    height * 0.014), //12 12
+                                            child: imageloader
+                                                ? Container(
+                                                    height: 20,
+                                                    width: 20,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      strokeWidth: 1.4,
+                                                    ),
+                                                  )
+                                                : Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Container(
+                                                        height:
+                                                            height * 0.018, //16
+                                                        child: SvgPicture.asset(
+                                                            'assets/paperclip.svg'),
+                                                      ),
+                                                      SizedBox(
+                                                          width: width *
+                                                              0.020), //8
+                                                      Text("Attach image",
+                                                          style: TextStyle(
+                                                              fontFamily:
+                                                                  "Montserrat",
+                                                              fontSize: width *
+                                                                  0.03, //12
+                                                              color:
+                                                                  Colors.black))
+                                                    ],
+                                                  ),
+                                          ))),
+                                    )
+                                  : Container(
                                       child: Row(
                                         mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Container(
-                                            height: height * 0.018, //16
-                                            child: SvgPicture.asset(
-                                                'assets/paperclip.svg'),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                height: 50,
+                                                width: 40,
+                                                color: grey,
+                                                child: Image.network(imageUrl!),
+                                              ),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              imageloader
+                                                  ? Container(
+                                                      height: 20,
+                                                      width: 20,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                        strokeWidth: 1.4,
+                                                      ),
+                                                    )
+                                                  : Text(
+                                                      'Image Uploaded',
+                                                      style: TextStyle(
+                                                          fontFamily:
+                                                              'Montserrat',
+                                                          color: Colors.black),
+                                                    )
+                                            ],
                                           ),
-                                          SizedBox(width: width * 0.020), //8
-                                          Text("Attach image",
-                                              style: TextStyle(
-                                                  fontFamily: "Montserrat",
-                                                  fontSize: width * 0.03, //12
-                                                  color: Colors.black))
+                                          InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                type = 'doubt';
+                                              });
+                                              uploadDoubtImage();
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                  color: grey,
+                                                  borderRadius:
+                                                      BorderRadius.circular(6)),
+                                              child: Padding(
+                                                padding: EdgeInsets.all(10),
+                                                child: Text(
+                                                  'Change Image',
+                                                  style: TextStyle(
+                                                      fontFamily: 'Montserrat',
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                            ),
+                                          )
                                         ],
                                       ),
-                                    ))),
-                              ),
+                                    ),
                               SizedBox(height: height * 0.035), //30
                               InkWell(
                                 onTap: () {
@@ -339,10 +428,6 @@ class _BottomDrawerState extends State<BottomDrawer> {
                                   ),
                                 ),
                               ),
-
-                              (imageUrl != null)
-                                  ? Image.network(imageUrl!)
-                                  : Container(height: 0),
                             ],
                           ),
                         )

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -10,6 +11,7 @@ import 'package:mentor_mate/components/doubt_card.dart';
 import 'package:mentor_mate/components/imageLarge.dart';
 import 'package:mentor_mate/components/popup.dart';
 import 'package:mentor_mate/globals.dart';
+import 'package:mentor_mate/home.dart';
 import 'package:mentor_mate/search.dart';
 import 'package:mentor_mate/teacher_chat_screen.dart';
 import 'package:intl/intl.dart';
@@ -406,6 +408,13 @@ class ForumChatScreen extends StatefulWidget {
 
 class _ForumChatScreenState extends State<ForumChatScreen> {
   String? date = '';
+  bool solved = false;
+
+  void setSolved(bool value) {
+    setState(() {
+      solved = value;
+    });
+  }
 
   @override
   void initState() {
@@ -451,26 +460,6 @@ class _ForumChatScreenState extends State<ForumChatScreen> {
                   decoration:
                       BoxDecoration(borderRadius: BorderRadius.circular(20)),
                   child: Center(child: SvgPicture.asset('assets/back.svg')))),
-          /*title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.userMap['name'],
-                style: TextStyle(
-                    fontFamily: "MontserratB",
-                    fontSize: 16, //24
-                    color: Colors.black),
-              ),
-              SizedBox(height: 5),
-              Text(
-                widget.userMap['studentKey'],
-                style: TextStyle(
-                    fontFamily: "MontserratM",
-                    fontSize: 12,
-                    color: Colors.black.withOpacity(0.4)),
-              ),
-            ],
-          ),*/
         ),
       ),
       body: Stack(
@@ -543,19 +532,20 @@ class _ForumChatScreenState extends State<ForumChatScreen> {
                                     Map<String, dynamic> map =
                                         snapshot.data!.docs[index].data()
                                             as Map<String, dynamic>;
-
-                                    /*if (map['id'] != null) {
-                                    setState(() {
-                                      id = map['id'];
-                                      print(
-                                          'inside setState-------------------------------');
-                                      print(id);
-                                    });
-                                  }*/
-
+                                    if (map['solved'] == true &&
+                                        solved == false) {
+                                      WidgetsBinding.instance!
+                                          .addPostFrameCallback(
+                                              (_) => setState(() {
+                                                    solved = true;
+                                                  }));
+                                    }
                                     return InkWell(
                                       onTap: () {
-                                        if (role == 'student') {
+                                        if (role == 'student' &&
+                                            !solved &&
+                                            widget.userMap['name'] ==
+                                                currentName) {
                                           Navigator.of(context).push(
                                               HeroDialogRoute(
                                                   builder: (context) {
@@ -589,16 +579,15 @@ class _ForumChatScreenState extends State<ForumChatScreen> {
                         }
                       })),
               Positioned(
-                bottom: 0,
-                child: role == 'teacher'
-                    ? Container(
-                        height: 80,
-                        width: width,
-                        color: grey,
-                        child: TextInputForum(docId: widget.chatRoomId),
-                      )
-                    : Container(),
-              )
+                  bottom: 0,
+                  child: !solved
+                      ? Container(
+                          height: 80,
+                          width: width,
+                          color: grey,
+                          child: TextInputForum(docId: widget.chatRoomId),
+                        )
+                      : Container())
               //Container(width: width, child: TextInput()),
             ],
           ),
