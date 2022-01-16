@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:mentor_mate/chat/firebase.dart';
 import 'package:mentor_mate/components/bottom_drawer.dart';
 import 'package:mentor_mate/components/imageLarge.dart';
@@ -38,6 +39,8 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String? date = ' ';
+  String? predate = ' ';
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
             maxLines: 2,
             style: TextStyle(
                 fontFamily: "MontserratB",
-                fontSize: 18, //24
+                fontSize: 20, //24
                 color: Colors.black),
           ),
           actions: [
@@ -87,15 +90,23 @@ class _ChatScreenState extends State<ChatScreen> {
                         Drawerclass.showMenu = true;
                       });
                     },
-                    child: Text("AskDoubt",
-                        style: TextStyle(
-                            fontFamily: "Montserrat",
-                            fontSize: width * 0.04, //16
-                            color: Colors.black)),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(width: 1, color: Colors.black)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: Text("AskDoubt",
+                            style: TextStyle(
+                                fontFamily: "Montserrat",
+                                fontSize: width * 0.04, //16
+                                color: Colors.black)),
+                      ),
+                    ),
                   ),
-                  SizedBox(
+                  /*SizedBox(
                     width: width * 0.076, //30
-                  ),
+                  ),*/
                   InkWell(
                       onTap: () {
                         Navigator.of(context)
@@ -167,34 +178,105 @@ class _ChatScreenState extends State<ChatScreen> {
                                 Map<String, dynamic> map =
                                     snapshot.data!.docs[index].data()
                                         as Map<String, dynamic>;
+                                if (index < snapshot.data!.docs.length - 1) {
+                                  Map<String, dynamic> premap =
+                                      snapshot.data!.docs[index + 1].data()
+                                          as Map<String, dynamic>;
+                                  DateTime dte1 =
+                                      premap['servertimestamp'].toDate();
+                                  String dateSlug1 =
+                                      "${dte1.day.toString().padLeft(2, '0')} ${months[dte1.month - 1].padLeft(2, '0')} ${dte1.year.toString()}";
+                                  predate = dateSlug1;
+                                }
+                                DateTime dte = map['servertimestamp'].toDate();
+                                String dateSlug =
+                                    "${dte.day.toString().padLeft(2, '0')} ${months[dte.month - 1].padLeft(2, '0')} ${dte.year.toString()}";
+                                date = dateSlug;
                                 if (map['type'] == 'link') {
-                                  return MeetCard(
-                                    time: map['meet_at'],
+                                  return Column(
+                                    children: [
+                                      date != predate ||
+                                              index ==
+                                                  snapshot.data!.docs.length - 1
+                                          ? Text(
+                                              '\n$date\n',
+                                              style: TextStyle(
+                                                  fontFamily: "MontserratSB",
+                                                  fontSize: 16,
+                                                  color: Colors.black
+                                                      .withOpacity(0.1)),
+                                            )
+                                          : Container(),
+                                      MeetCard(
+                                        time: map['meet_at'],
+                                      ),
+                                    ],
                                   );
                                 } else {
                                   return map['type'] == 'message'
-                                      ? Message(
-                                          check: 'student',
-                                          map: map,
+                                      ? Column(
+                                          children: [
+                                            date != predate ||
+                                                    index ==
+                                                        snapshot.data!.docs
+                                                                .length -
+                                                            1
+                                                ? Text(
+                                                    '\n$date\n',
+                                                    style: TextStyle(
+                                                        fontFamily:
+                                                            "MontserratSB",
+                                                        fontSize: 16,
+                                                        color: Colors.black
+                                                            .withOpacity(0.1)),
+                                                  )
+                                                : Container(),
+                                            Message(
+                                              check: 'student',
+                                              map: map,
+                                            ),
+                                          ],
                                         )
-                                      : InkWell(
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                                HeroDialogRoute(
-                                                    builder: (context) {
-                                              return DoubtSolvedPopup(
-                                                  doubtid: document.id,
-                                                  id: widget.chatRoomId!,
-                                                  map: map);
-                                            }));
-                                          },
-                                          child: Hero(
-                                              tag: 'doubt',
-                                              createRectTween: (begin, end) {
-                                                return CustomRectTween(
-                                                    begin: begin, end: end);
-                                              },
-                                              child: DoubtMessage(map: map)));
+                                      : Column(
+                                          children: [
+                                            date != predate ||
+                                                    index ==
+                                                        snapshot.data!.docs
+                                                                .length -
+                                                            1
+                                                ? Text(
+                                                    '\n$date\n',
+                                                    style: TextStyle(
+                                                        fontFamily:
+                                                            "MontserratSB",
+                                                        fontSize: 16,
+                                                        color: Colors.black
+                                                            .withOpacity(0.1)),
+                                                  )
+                                                : Container(),
+                                            InkWell(
+                                                onTap: () {
+                                                  Navigator.of(context).push(
+                                                      HeroDialogRoute(
+                                                          builder: (context) {
+                                                    return DoubtSolvedPopup(
+                                                        doubtid: document.id,
+                                                        id: widget.chatRoomId!,
+                                                        map: map);
+                                                  }));
+                                                },
+                                                child: Hero(
+                                                    tag: 'doubt',
+                                                    createRectTween:
+                                                        (begin, end) {
+                                                      return CustomRectTween(
+                                                          begin: begin,
+                                                          end: end);
+                                                    },
+                                                    child: DoubtMessage(
+                                                        map: map))),
+                                          ],
+                                        );
                                 }
                               });
                         } else {
@@ -213,6 +295,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
           //this widget is bottom drawer
           BottomDrawer(
+            task: 'doubt',
             showMenu: Drawerclass.showMenu,
           )
         ],
@@ -230,11 +313,28 @@ class Message extends StatefulWidget {
 }
 
 class _MessageState extends State<Message> {
+  String? date;
+  String? time;
+
+  @override
+  void initState() {
+    super.initState();
+    DateTime dte = widget.map['servertimestamp'].toDate();
+    String dateSlug =
+        "${dte.day.toString().padLeft(2, '0')} ${months[dte.month - 1].padLeft(2, '0')} ${dte.year.toString()}";
+    var dateone = widget.map['time'].toString().split(' : ');
+    var input = DateFormat('HH:mm').parse('${dateone[0]}:${dateone[1]}');
+    setState(() {
+      date = dateSlug;
+      time = DateFormat('hh:mm a').format(input);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    final grey = const Color(0xFFe0e3e3).withOpacity(0.5);
+    final grey = const Color(0xFFe0e3e3).withOpacity(0.3);
     return Padding(
       padding: EdgeInsets.symmetric(
           horizontal: width * 0.061, vertical: height * 0.009), //24 8
@@ -243,65 +343,93 @@ class _MessageState extends State<Message> {
             ? Alignment.topRight
             : Alignment.topLeft,
         child: (widget.map['image_url'] != null)
-            ? InkWell(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ImageLarge(
-                            imageurl: widget.map['image_url'],
-                          )));
-                },
-                child: Container(
+            ? Column(
+                crossAxisAlignment: widget.map['sendby'] == widget.check
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => ImageLarge(
+                                imageurl: widget.map['image_url'],
+                              )));
+                    },
+                    child: Container(
+                        decoration: BoxDecoration(
+                            color: grey.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(10)),
+                        width: 200,
+                        height: 200,
+                        child: Center(
+                            child: loader == true
+                                ? CircularProgressIndicator()
+                                : Container(
+                                    decoration: BoxDecoration(
+                                        color: grey.withOpacity(0.3),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    width: 190,
+                                    height: 190,
+                                    child: Hero(
+                                      tag: widget.map['image_url'],
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          widget.map['image_url'],
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  ))),
+                  ),
+                  SizedBox(
+                    height: 4,
+                  ),
+                  Text('  $time  ',
+                      style: TextStyle(
+                          fontFamily: "MontserratM",
+                          fontSize: 12, //10
+                          color: Colors.black.withOpacity(0.3))),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: widget.map['sendby'] == widget.check
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    constraints: BoxConstraints(
+                      maxWidth: width * 0.71,
+                    ),
                     decoration: BoxDecoration(
                         color: grey, borderRadius: BorderRadius.circular(10)),
-                    width: 200,
-                    height: 200,
-                    child: Center(
-                        child: loader == true
-                            ? CircularProgressIndicator()
-                            : Container(
-                                decoration: BoxDecoration(
-                                    color: grey,
-                                    borderRadius: BorderRadius.circular(10)),
-                                width: 190,
-                                height: 190,
-                                child: Hero(
-                                  tag: widget.map['image_url'],
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      widget.map['image_url'],
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                              ))),
-              )
-            : Container(
-                constraints: BoxConstraints(
-                    maxWidth: width * 0.71, minWidth: width * 0.25), //280 100
-                decoration: BoxDecoration(
-                    color: grey, borderRadius: BorderRadius.circular(10)),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: width * 0.04,
-                      vertical: height * 0.018), //16 16
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(/*widget.message!*/ widget.map['message'],
-                          style: TextStyle(
-                              fontFamily: "Montserrat",
-                              fontSize: width * 0.045, //18
-                              color: Colors.black)),
-                      SizedBox(height: height * 0.009), //8
-                      Text(widget.map['time'].toString(),
-                          style: TextStyle(
-                              fontFamily: "MontserratM",
-                              fontSize: width * 0.025, //10
-                              color: Colors.black.withOpacity(0.3)))
-                    ],
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 18, vertical: 12), //16 16
+                      child: Column(
+                        crossAxisAlignment: widget.map['sendby'] == widget.check
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          Text(/*widget.message!*/ widget.map['message'],
+                              style: TextStyle(
+                                  fontFamily: "Montserrat",
+                                  fontSize: 16, //18
+                                  color: Colors.black)), //8
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                  SizedBox(
+                    height: 4,
+                  ),
+                  Text('  $time  ',
+                      style: TextStyle(
+                          fontFamily: "MontserratM",
+                          fontSize: 12, //10
+                          color: Colors.black.withOpacity(0.3))),
+                ],
               ),
       ),
     );
@@ -316,13 +444,31 @@ class DoubtMessage extends StatefulWidget {
 }
 
 class _DoubtMessageState extends State<DoubtMessage> {
+  String? date;
+  String? time;
+
+  @override
+  void initState() {
+    super.initState();
+    DateTime dte = widget.map['servertimestamp'].toDate();
+    String dateSlug =
+        "${dte.day.toString().padLeft(2, '0')} ${months[dte.month - 1].padLeft(2, '0')} ${dte.year.toString()}";
+    var dateone = widget.map['time'].toString().split(' : ');
+    var input = DateFormat('HH:mm').parse('${dateone[0]}:${dateone[1]}');
+    setState(() {
+      date = dateSlug;
+      time = DateFormat('hh:mm a').format(input);
+    });
+    // 12/31/2000, 10:00 PM
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return Container(
       width: width,
-      color: grey.withOpacity(0.3),
+      color: grey.withOpacity(0.2),
       child: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: width * 0.045, vertical: height * 0.021), //18 18
@@ -409,8 +555,8 @@ class _DoubtMessageState extends State<DoubtMessage> {
                   ),
             Padding(
               padding: EdgeInsets.only(
-                  left: width * 0.05, top: height * 0.009), //20 8
-              child: Text(widget.map['time'].toString(),
+                  left: width * 0.05, top: height * 0.004), //20 8
+              child: Text(time!,
                   style: TextStyle(
                       fontFamily: "MontserratM",
                       fontSize: width * 0.035, //14
@@ -436,7 +582,7 @@ class _TextInputState extends State<TextInput> {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    final grey = const Color(0xFFe0e3e3).withOpacity(0.5);
+    final grey = const Color(0xFFe0e3e3).withOpacity(0.4);
     return Container(
       height: height * 0.058, //50
       width: width,
@@ -494,7 +640,7 @@ class _TextInputState extends State<TextInput> {
                 if (widget.docId != null) {
                   onProvideSolution(widget.docId);
                 } else {
-                  onSendMessage();
+                  onSendMessage(false);
                 }
               },
               child: Padding(
@@ -529,6 +675,17 @@ class MeetCard extends StatefulWidget {
 }
 
 class _MeetCardState extends State<MeetCard> {
+  String? time;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    var dateone = widget.time.toString().substring(10, 15).split(':');
+    var input = DateFormat('HH:mm').parse('${dateone[0]}:${dateone[1]}');
+    time = DateFormat('hh:mm a').format(input);
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -542,14 +699,17 @@ class _MeetCardState extends State<MeetCard> {
           throw 'Could not launch $url';
         }
       },
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: width * 0.061, vertical: height * 0.009), //24 8
-        child: Container(
+      child: Container(
+        alignment:
+            role == 'teacher' ? Alignment.centerRight : Alignment.centerLeft,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: width * 0.061, vertical: height * 0.009), //24 8
           child: Container(
-            //280 100
+            width: width - 80,
             decoration: BoxDecoration(
-                color: grey, borderRadius: BorderRadius.circular(10)),
+                color: grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(10)),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width * 0.04, vertical: height * 0.018), //16 16
@@ -557,18 +717,17 @@ class _MeetCardState extends State<MeetCard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                      'Join this link at ${widget.time.toString().substring(10, 15)}',
+                  Text('Join this link at $time',
                       style: TextStyle(
                           fontFamily: "MontserratM",
                           fontSize: 12, //18
                           color: Colors.black)),
-                  SizedBox(height: 8), //8
+                  SizedBox(height: 6), //8
                   Text(meetlink!,
                       style: TextStyle(
                           fontFamily: "MontserratM",
-                          fontSize: 18, //10
-                          color: Colors.black))
+                          fontSize: 16, //10
+                          color: Colors.blue))
                 ],
               ),
             ),

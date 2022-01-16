@@ -1,4 +1,3 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -299,9 +298,7 @@ class _TeacherLoginState extends State<TeacherLogin> {
           right: width * 0.254, //100
           bottom: height * 0.070, //60
           child: [nameOpacity, present].every((element) => element == 1.0)
-              ? AnimatedTextKit(
-                  pause: Duration(milliseconds: 1500),
-                  repeatForever: true,
+              ? InkWell(
                   onTap: () {
                     addTeacher();
                     Fluttertoast.showToast(
@@ -318,16 +315,14 @@ class _TeacherLoginState extends State<TeacherLogin> {
                           builder: (context) => Login(),
                         ));
                   },
-                  animatedTexts: [
-                      TyperAnimatedText(
-                        'Next →',
-                        textStyle: TextStyle(
-                          fontFamily: "MontserratSB",
-                          fontSize: width * 0.0611, //24
-                          color: Colors.black,
-                        ),
-                      )
-                    ])
+                  child: Text(
+                    'Next →',
+                    style: TextStyle(
+                      fontFamily: "MontserratSB",
+                      fontSize: width * 0.0611, //24
+                      color: Colors.black,
+                    ),
+                  ))
               : Container(),
         )
       ]),

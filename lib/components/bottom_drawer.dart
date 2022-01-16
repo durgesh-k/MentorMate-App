@@ -11,13 +11,15 @@ import 'package:permission_handler/permission_handler.dart';
 
 class BottomDrawer extends StatefulWidget {
   bool? showMenu;
-  BottomDrawer({this.showMenu});
+  String? task;
+  BottomDrawer({this.showMenu, this.task});
   @override
   _BottomDrawerState createState() => _BottomDrawerState();
 }
 
 class _BottomDrawerState extends State<BottomDrawer> {
   FlutterLocalNotificationsPlugin? flutterLocalNotifications;
+  bool? anonimity = false;
 
   @override
   void initState() {
@@ -58,12 +60,11 @@ class _BottomDrawerState extends State<BottomDrawer> {
 
         var downloadUrl = await snapshot.ref.getDownloadURL();
 
-        imageUrl = downloadUrl;
         print(imageUrl);
         setState(() {
+          imageUrl = downloadUrl;
           imageloader = false;
         });
-
         /*if (type == 'forumDoubt') {
           onProvideSolution(docId);
         } else {
@@ -292,9 +293,11 @@ class _BottomDrawerState extends State<BottomDrawer> {
                               imageUrl == null
                                   ? InkWell(
                                       onTap: () {
-                                        setState(() {
-                                          type = 'doubt';
-                                        });
+                                        if (widget.task == 'doubt') {
+                                          setState(() {
+                                            type = 'doubt';
+                                          });
+                                        }
                                         uploadDoubtImage();
                                       },
                                       child: Container(
@@ -404,13 +407,73 @@ class _BottomDrawerState extends State<BottomDrawer> {
                                         ],
                                       ),
                                     ),
-                              SizedBox(height: height * 0.035), //30
+                              SizedBox(height: 15),
+                              widget.task != 'doubt'
+                                  ? Row(
+                                      children: [
+                                        Container(
+                                          height: 24,
+                                          width: 24,
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              border: Border.all(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.5),
+                                                  width: 1)),
+                                          child: Transform.scale(
+                                            scale: 0.9,
+                                            child: Checkbox(
+                                                side: BorderSide.none,
+                                                checkColor: Colors.black,
+                                                shape: CircleBorder(),
+                                                activeColor: Colors.black,
+                                                value: anonimity,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    anonimity = !anonimity!;
+                                                  });
+                                                }),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 8,
+                                        ),
+                                        Text(
+                                          'Post Anonymous',
+                                          style: TextStyle(
+                                              fontFamily: 'MontserratM'),
+                                        )
+                                      ],
+                                    )
+                                  : Container(),
+                              SizedBox(height: 8),
+                              widget.task != 'doubt'
+                                  ? AnimatedOpacity(
+                                      opacity: anonimity! ? 0.3 : 0,
+                                      duration: Duration(microseconds: 300),
+                                      child: Container(
+                                        width: width,
+                                        child: Text(
+                                          'Posting inappropriate content while anonymous may lead to disabling your account',
+                                          style: TextStyle(
+                                              fontFamily: 'MontserratM'),
+                                        ),
+                                      ),
+                                    )
+                                  : Container(),
+                              SizedBox(height: 30),
                               InkWell(
                                 onTap: () {
                                   Drawerclass.showMenu = false;
                                   widget.showMenu = false;
+                                  /*if (type == 'forumDoubt') {
+                                    onProvideSolution(docId);
+                                  } else {
+                                    onSendMessage(anonimity!);
+                                  }*/
                                   _showNotification();
-                                  onSendMessage();
+                                  onSendMessage(anonimity!);
                                 },
                                 child: Container(
                                   height: 40,

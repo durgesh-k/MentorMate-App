@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mentor_mate/globals.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -22,7 +24,7 @@ String chatRoomId(String user1, String user2) {
   }
 }
 
-String roomId = chatRoomId(auth.currentUser!.uid, userMap?['uid']);
+String roomId = chatRoomId(auth.currentUser!.uid, userMap?['uid'] ?? 'gcyj');
 
 void onProvideSolution(String? docId) async {
   var user;
@@ -61,7 +63,8 @@ void onProvideSolution(String? docId) async {
       'name': user['name'].toString(),
       'image_url': imageUrl,
       'servertimestamp': FieldValue.serverTimestamp(),
-      'searchKeywords': '{$messageTitle[0]}'
+      'searchKeywords': '{$messageTitle[0]}',
+      'uid': FirebaseAuth.instance.currentUser!.uid
     };
     message.clear();
     await _firestore
@@ -82,7 +85,7 @@ void getUser() async {
   });
 }
 
-void onSendMessage() async {
+void onSendMessage(bool anonimity) async {
   var user;
   print('--this is role-------$role');
   role == 'student'
@@ -136,7 +139,7 @@ void onSendMessage() async {
         type = 'doubt';
       }
     }
-    for (int i = 0; i < messageTitle.toString().length; i++) {}
+    //for (int i = 0; i < messageTitle.toString().length; i++) {}
     Map<String, dynamic> messages = {
       'id': id,
       "sendby": user['role'].toString(),
@@ -149,6 +152,7 @@ void onSendMessage() async {
       'title': messageTitle.text,
       "time": '${now.hour} : ${now.minute}',
       'name': user['name'].toString(),
+      'anonymous': anonimity,
       'studentKey':
           '${user['year']} ${user['branch']} ${user['div']} ${user['roll']}',
       'image_url': imageUrl,
@@ -188,7 +192,7 @@ void addForumDoubts(Map<String, dynamic> doubtmessage) async {
   await _firestore.collection('Forum').add(doubtmessage);
 }
 
-void uploadImage() async {
+void uploadImage(bool? anonymity) async {
   final _storage = FirebaseStorage.instance;
   final _picker = ImagePicker();
   PickedFile image;
@@ -216,7 +220,7 @@ void uploadImage() async {
       if (type == 'forumDoubt') {
         onProvideSolution(docId);
       } else {
-        onSendMessage();
+        onSendMessage(anonymity!);
       }
     } else {
       print('No Path Received');
@@ -309,4 +313,27 @@ void sendImage(String? chatroomId) async {
           .add(messages);
     }
   }
+}
+
+Future<void> addReport(String against, String from, String reason, String doc,
+    String collection, String doc2) async {
+  Map<String, dynamic> map = {
+    'against': against,
+    'from': from,
+    'reason': reason,
+    'doc': doc,
+    'doc2': doc2,
+    'collection': collection,
+    'action_taken': false,
+    'servertimestamp': FieldValue.serverTimestamp(),
+  };
+  await _firestore.collection('Reports').add(map);
+  Fluttertoast.showToast(
+      msg: 'Reported the message',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: grey,
+      textColor: Colors.black,
+      fontSize: 16.0);
 }

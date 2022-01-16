@@ -1,4 +1,3 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -197,9 +196,7 @@ class _LoginState extends State<Login> {
           right: width * 0.254, //100
           bottom: height * 0.07, //60
           child: (_email.text.isNotEmpty && _password.text.isNotEmpty)
-              ? AnimatedTextKit(
-                  pause: Duration(milliseconds: 1500),
-                  repeatForever: true,
+              ? InkWell(
                   onTap: () {
                     Navigator.push(
                         context,
@@ -287,16 +284,15 @@ class _LoginState extends State<Login> {
                       print("Please fill form correctly");
                     }
                   },
-                  animatedTexts: [
-                      TyperAnimatedText(
-                        'Next →',
-                        textStyle: TextStyle(
-                          fontFamily: "MontserratSB",
-                          fontSize: width * 0.061, //24
-                          color: Colors.black,
-                        ),
-                      )
-                    ])
+                  child: Text(
+                    'Next →',
+                    style: TextStyle(
+                      fontFamily: "MontserratSB",
+                      fontSize: width * 0.061, //24
+                      color: Colors.black,
+                    ),
+                  ),
+                )
               : Container(),
         )
       ]),

@@ -72,7 +72,7 @@ Future logOut(BuildContext context) async {
     await _auth.signOut().then((value) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => StudentorTeacher()),
+        MaterialPageRoute(builder: (context) => Welcome()),
       );
     });
   } catch (e) {
@@ -109,6 +109,8 @@ void addUserData() async {
       "istyping": false,
       "recent": "no messages",
       "touser": "noid",
+      'strikes': 0,
+      'points': 0,
       'id':
           '${nameController.text} ${yearController.text} ${branchController.text} ${divController.text} ${rollController.text}'
     };

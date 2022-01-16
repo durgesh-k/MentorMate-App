@@ -294,6 +294,7 @@ class ForumDoubtPopup extends StatefulWidget {
 }
 
 class _ForumDoubtPopupState extends State<ForumDoubtPopup> {
+  int pts = 0;
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -355,6 +356,7 @@ class _ForumDoubtPopupState extends State<ForumDoubtPopup> {
                             'image_url': widget.map['image_url'],
                             'servertimestamp': widget.map['servertimestamp'],
                             'searchKeywords': widget.map['searchKeywords'],
+                            'uid': widget.map['uid']
                           };
                           Navigator.pop(context);
                           await FirebaseFirestore.instance
@@ -363,6 +365,21 @@ class _ForumDoubtPopupState extends State<ForumDoubtPopup> {
                               .collection('solutions')
                               .doc(widget.doubtid)
                               .set(message);
+                          await FirebaseFirestore.instance
+                              .collection('Forum')
+                              .doc(widget.id)
+                              .update({'solved': true});
+                          await FirebaseFirestore.instance
+                              .collection('Users')
+                              .doc(widget.map['uid'])
+                              .get()
+                              .then((value) {
+                            pts = value.get('points');
+                          });
+                          await FirebaseFirestore.instance
+                              .collection('Users')
+                              .doc(widget.map['uid'])
+                              .update({'points': pts += 5});
                         });
                       },
                       child: const Text(
@@ -450,7 +467,7 @@ class _MeetAcceptPopupCardState extends State<MeetAcceptPopupCard> {
                         print(message.text);
                         message.text = "https://meet.google.com/wax-ncmq-eim";
                         print(message.text);
-                        onSendMessage();
+                        onSendMessage(false);
                         Navigator.pop(context);
                       },
                       child: const Text(

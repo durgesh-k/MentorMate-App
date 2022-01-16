@@ -1,4 +1,3 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -261,9 +260,7 @@ class _RegisterState extends State<Register> {
             yearOpacity,
             rollOpacity
           ].every((element) => element == 1.0)
-              ? AnimatedTextKit(
-                  pause: Duration(milliseconds: 1500),
-                  repeatForever: true,
+              ? InkWell(
                   onTap: () {
                     addUserData();
                     Fluttertoast.showToast(
@@ -280,16 +277,14 @@ class _RegisterState extends State<Register> {
                           builder: (context) => Login(),
                         ));
                   },
-                  animatedTexts: [
-                      TyperAnimatedText(
-                        'Next →',
-                        textStyle: TextStyle(
-                          fontFamily: "MontserratSB",
-                          fontSize: width * 0.061, //24
-                          color: Colors.black,
-                        ),
-                      )
-                    ])
+                  child: Text(
+                    'Next →',
+                    style: TextStyle(
+                      fontFamily: "MontserratSB",
+                      fontSize: width * 0.061, //24
+                      color: Colors.black,
+                    ),
+                  ))
               : Container(),
         )
       ]),

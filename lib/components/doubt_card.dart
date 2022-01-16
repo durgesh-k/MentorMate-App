@@ -16,6 +16,19 @@ class Doubts extends StatefulWidget {
 }
 
 class _DoubtsState extends State<Doubts> {
+  String? date;
+
+  @override
+  void initState() {
+    super.initState();
+    DateTime dte = widget.map['servertimestamp'].toDate();
+    String dateSlug =
+        "${dte.day.toString().padLeft(2, '0')} ${months[dte.month - 1].padLeft(2, '0')} ${dte.year.toString()}";
+    setState(() {
+      date = dateSlug;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -111,7 +124,7 @@ class _DoubtsState extends State<Doubts> {
             Padding(
               padding: EdgeInsets.only(
                   left: width * 0.05, top: height * 0.009), //20 8
-              child: Text(widget.map['time'],
+              child: Text(date!,
                   style: TextStyle(
                       fontFamily: "MontserratM",
                       fontSize: width * 0.035, //14
@@ -129,10 +142,22 @@ class _DoubtsState extends State<Doubts> {
                         },
                         child: Hero(
                             tag: widget.map['image_url'],
-                            child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child:
-                                    Image.network(widget.map['image_url']!)))),
+                            child: Container(
+                                height: 300,
+                                width: width,
+                                decoration: BoxDecoration(
+                                    color: grey,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        width: 2,
+                                        color: Colors.black.withOpacity(0.1))),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    widget.map['image_url']!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )))),
                   )
                 : Container(
                     height: 0,

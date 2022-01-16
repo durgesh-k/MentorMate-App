@@ -335,6 +335,84 @@ class _StudentHomeState extends State<StudentHome> {
                   ),
                 ),
                 SizedBox(
+                  height: 10,
+                ),
+                StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('Users')
+                        .where('uid',
+                            isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                        .snapshots(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.data != null) {
+                        Map<String, dynamic> map = snapshot.data!.docs[0].data()
+                            as Map<String, dynamic>;
+                        return Row(
+                          children: [
+                            Container(
+                              /*padding: EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                  color: grey,
+                                  borderRadius: BorderRadius.circular(20)),*/
+                              child: Row(
+                                children: [
+                                  Container(
+                                    height: 26,
+                                    width: 26,
+                                    child: Image.asset(
+                                      'assets/medal.png',
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 4,
+                                  ),
+                                  Text(
+                                    map['points'].toString(),
+                                    style: TextStyle(
+                                        fontFamily: 'MontserratM',
+                                        fontSize: 16),
+                                  )
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            map['strikes'] > 0
+                                ? Container(
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          height: 24,
+                                          width: 24,
+                                          child: Image.asset(
+                                            'assets/strike.png',
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 4,
+                                        ),
+                                        Text(
+                                          map['strikes'].toString(),
+                                          style: TextStyle(
+                                            fontFamily: 'MontserratM',
+                                            color: Colors.red,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  )
+                                : Container()
+                          ],
+                        );
+                      } else {
+                        return Container();
+                      }
+                    }),
+                SizedBox(
                   height: 50,
                 ),
                 InkWell(

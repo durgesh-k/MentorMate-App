@@ -1,4 +1,3 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -195,9 +194,7 @@ class _SignUpState extends State<SignUp> {
             emailOpacity,
             passOpacity,
           ].every((element) => element == 1.0)
-              ? AnimatedTextKit(
-                  pause: Duration(milliseconds: 1500),
-                  repeatForever: true,
+              ? InkWell(
                   onTap: () {
                     Navigator.push(
                         context,
@@ -268,16 +265,14 @@ class _SignUpState extends State<SignUp> {
                       print("Please enter Fields");
                     }
                   },
-                  animatedTexts: [
-                      TyperAnimatedText(
-                        'Next →',
-                        textStyle: TextStyle(
-                          fontFamily: "MontserratSB",
-                          fontSize: width * 0.061, //24
-                          color: Colors.black,
-                        ),
-                      )
-                    ])
+                  child: Text(
+                    'Next →',
+                    style: TextStyle(
+                      fontFamily: "MontserratSB",
+                      fontSize: width * 0.061, //24
+                      color: Colors.black,
+                    ),
+                  ))
               : Container(),
         )
       ]),

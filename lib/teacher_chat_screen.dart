@@ -29,6 +29,8 @@ class TeacherChatScreen extends StatefulWidget {
 
 class _TeacherChatScreenState extends State<TeacherChatScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String? date = ' ';
+  String? predate = ' ';
 
   @override
   Widget build(BuildContext context) {
@@ -62,17 +64,17 @@ class _TeacherChatScreenState extends State<TeacherChatScreen> {
                 widget.userMap!['name'],
                 style: TextStyle(
                     fontFamily: "MontserratB",
-                    fontSize: 16, //24
+                    fontSize: 18, //24
                     color: Colors.black),
               ),
               SizedBox(height: 5),
-              /*Text(
+              Text(
                 widget.userMap!['studentKey'],
                 style: TextStyle(
-                    fontFamily: "MontserratM",
-                    fontSize: 12,
-                    color: Colors.black.withOpacity(0.4)),
-              ),*/
+                    fontFamily: "Montserrat",
+                    fontSize: 12, //24
+                    color: Colors.black),
+              ),
             ],
           ),
           actions: [
@@ -108,6 +110,7 @@ class _TeacherChatScreenState extends State<TeacherChatScreen> {
       body: Stack(
         children: [
           Column(
+            mainAxisSize: MainAxisSize.max,
             children: [
               Expanded(
                   child: StreamBuilder<QuerySnapshot>(
@@ -132,26 +135,85 @@ class _TeacherChatScreenState extends State<TeacherChatScreen> {
                                 Map<String, dynamic> map =
                                     snapshot.data!.docs[index].data()
                                         as Map<String, dynamic>;
-
-                                /*if (map['id'] != null) {
-                                    setState(() {
-                                      id = map['id'];
-                                      print(
-                                          'inside setState-------------------------------');
-                                      print(id);
-                                    });
-                                  }*/
+                                if (index < snapshot.data!.docs.length - 1) {
+                                  Map<String, dynamic> premap =
+                                      snapshot.data!.docs[index + 1].data()
+                                          as Map<String, dynamic>;
+                                  DateTime dte1 =
+                                      premap['servertimestamp'].toDate();
+                                  String dateSlug1 =
+                                      "${dte1.day.toString().padLeft(2, '0')} ${months[dte1.month - 1].padLeft(2, '0')} ${dte1.year.toString()}";
+                                  predate = dateSlug1;
+                                }
+                                DateTime dte = map['servertimestamp'].toDate();
+                                String dateSlug =
+                                    "${dte.day.toString().padLeft(2, '0')} ${months[dte.month - 1].padLeft(2, '0')} ${dte.year.toString()}";
+                                date = dateSlug;
                                 if (map['type'] == 'link') {
-                                  return MeetCard(
-                                    time: map['meet_at'],
+                                  return Column(
+                                    children: [
+                                      date != predate ||
+                                              index ==
+                                                  snapshot.data!.docs.length - 1
+                                          ? Text(
+                                              '\n$date\n',
+                                              style: TextStyle(
+                                                  fontFamily: "MontserratSB",
+                                                  fontSize: 16,
+                                                  color: Colors.black
+                                                      .withOpacity(0.1)),
+                                            )
+                                          : Container(),
+                                      MeetCard(
+                                        time: map['meet_at'],
+                                      ),
+                                    ],
                                   );
                                 } else {
                                   return map['type'] == 'message'
-                                      ? Message(
-                                          check: 'teacher',
-                                          map: map,
+                                      ? Column(
+                                          children: [
+                                            date != predate ||
+                                                    index ==
+                                                        snapshot.data!.docs
+                                                                .length -
+                                                            1
+                                                ? Text(
+                                                    '\n$date\n',
+                                                    style: TextStyle(
+                                                        fontFamily:
+                                                            "MontserratSB",
+                                                        fontSize: 16,
+                                                        color: Colors.black
+                                                            .withOpacity(0.1)),
+                                                  )
+                                                : Container(),
+                                            Message(
+                                              check: 'teacher',
+                                              map: map,
+                                            ),
+                                          ],
                                         )
-                                      : DoubtMessage(map: map);
+                                      : Column(
+                                          children: [
+                                            date != predate ||
+                                                    index ==
+                                                        snapshot.data!.docs
+                                                                .length -
+                                                            1
+                                                ? Text(
+                                                    '\n$date\n',
+                                                    style: TextStyle(
+                                                        fontFamily:
+                                                            "MontserratSB",
+                                                        fontSize: 16,
+                                                        color: Colors.black
+                                                            .withOpacity(0.1)),
+                                                  )
+                                                : Container(),
+                                            DoubtMessage(map: map),
+                                          ],
+                                        );
                                 }
                               });
                         } else {
@@ -245,7 +307,7 @@ class _TextInput2State extends State<TextInput2> {
                     type = 'message';
                     id = widget.id;
                   });
-                  onSendMessage();
+                  onSendMessage(false);
                 },
                 child: Container(
                   height: height * 0.058, //50
